@@ -58,7 +58,11 @@ docker compose -f infra/docker-compose.yml --env-file .env up -d --build
 
 Dashboard: **http://localhost:4200** · Gateway: `:5080` · ML API (Swagger): `:8000/docs`
 
+**Kirish (default admin):** `admin` / `Admin!2026` — birinchi startup'da avtomatik
+yaratiladi (`.env` orqali o'zgartiriladi). Login sahifasi JWT bilan himoyalangan.
+
 > Lokal PostgreSQL'ga tegilmaydi — loyiha DB'si Docker'da **5433**-portda.
+> Dashboard bog'liqliklari: PrimeNG 21 Angular 22 bilan `--legacy-peer-deps` talab qiladi.
 
 ## Development rejimi (Docker'siz, hot-reload)
 
@@ -66,7 +70,7 @@ Dashboard: **http://localhost:4200** · Gateway: `:5080` · ML API (Swagger): `:
 # DB/Redis Docker'da qoladi, servislar lokal:
 cd services/ml;  .\.venv\Scripts\python -m uvicorn app.main:app --port 8000
 cd services/gateway/src/SmartQueue.Gateway;  dotnet run --urls http://localhost:5080
-cd apps/dashboard;  ng serve
+cd apps/dashboard;  ng serve   # birinchi marta: npm install --legacy-peer-deps
 ```
 
 ## Testlar va hisobotlar

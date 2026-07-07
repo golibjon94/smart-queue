@@ -1,7 +1,8 @@
 FROM node:24-alpine AS build
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN npm ci
+# PrimeNG 21 peer-dep Angular 21 talab qiladi, bizda 22 — konflikt legacy rejimda hal qilinadi
+RUN npm ci --legacy-peer-deps
 COPY . .
 RUN npm run build
 
