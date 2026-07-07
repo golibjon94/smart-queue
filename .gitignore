@@ -1,0 +1,46 @@
+# === IDE ===
+.idea/
+.vscode/
+*.suo
+*.user
+
+# === Python ===
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.ipynb_checkpoints/
+
+# ML artefaktlar (modellar repo'ga kirmaydi)
+services/ml/models/*.joblib
+services/ml/models/*.onnx
+services/ml/reports/*.png
+
+# === .NET ===
+bin/
+obj/
+*.dll
+publish/
+
+# === Node / Angular ===
+node_modules/
+dist/
+.angular/
+npm-debug.log*
+
+# === Environment / secrets ===
+.env
+.env.local
+*.env
+!.env.example
+
+# === Docker / data ===
+infra/volumes/
+
+# === OS ===
+Thumbs.db
+.DS_Store

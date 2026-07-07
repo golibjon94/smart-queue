@@ -1,0 +1,43 @@
+name: smart-queue
+
+services:
+  timescaledb:
+    image: timescale/timescaledb:latest-pg17
+    container_name: sq-timescaledb
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-smartqueue}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_me_dev_only}
+      POSTGRES_DB: ${POSTGRES_DB:-smartqueue}
+    ports:
+      # Lokal PostgreSQL 18 5432-portni band qilgan — Docker DB tashqariga 5433 da chiqadi
+      - "${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - timescale_data:/var/lib/postgresql/data
+      # DIQQAT: /docker-entrypoint-initdb.d ustiga mount qilinmaydi — u yerda
+      # image'ning o'z skriptlari timescaledb kengaytmasini yaratadi.
+      # Migratsiya + seed: scripts/migrate.ps1 (B1 da yoziladi)
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-smartqueue} -d ${POSTGRES_DB:-smartqueue}"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: sq-redis
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    restart: unless-stopped
+
+  # B4 da qo'shiladi: python-ml (FastAPI)
+  # B5 da qo'shiladi: dotnet-gateway
+  # B6 da qo'shiladi: angular-nginx
+
+volumes:
+  timescale_data:
