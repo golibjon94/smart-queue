@@ -33,7 +33,7 @@ SERVICES = [
 
 BRANCHES = [
     BranchProfile(branch_id=1, daily_customers=350.0),
-    BranchProfile(branch_id=2, daily_customers=240.0),
+    BranchProfile(branch_id=2, daily_customers=300.0),
 ]
 
 # Soatlik shakl (yig'indisi 1.0): tushlik cho'qqisi 12-13, ish oxiri 16 da ko'tarilish
@@ -53,7 +53,7 @@ MONTH_END_FROM_DAY = 28   # 28-kundan oy oxirigacha
 MONTH_END_FACTOR = 1.25
 
 # Kunlik tasodifiy shovqin (log-normal sigma)
-DAILY_NOISE_SIGMA = 0.08
+DAILY_NOISE_SIGMA = 0.06
 
 # Navbat xulq-atvori
 WALK_SEC_RANGE = (20, 60)      # chaqirilgandan kassagacha yurish
