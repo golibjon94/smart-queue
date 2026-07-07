@@ -35,8 +35,51 @@ services:
       retries: 12
     restart: unless-stopped
 
-  # B4 da qo'shiladi: python-ml (FastAPI)
-  # B5 da qo'shiladi: dotnet-gateway
+  python-ml:
+    build: ../services/ml
+    container_name: sq-python-ml
+    environment:
+      # Konteyner ichida DB xizmat nomi orqali, ichki 5432-portda
+      POSTGRES_HOST: timescaledb
+      POSTGRES_PORT: "5432"
+      POSTGRES_USER: ${POSTGRES_USER:-smartqueue}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_me_dev_only}
+      POSTGRES_DB: ${POSTGRES_DB:-smartqueue}
+    ports:
+      - "${ML_SERVICE_PORT:-8000}:8000"
+    volumes:
+      - ../services/ml/models:/app/models:ro
+    depends_on:
+      timescaledb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    restart: unless-stopped
+
+  dotnet-gateway:
+    build: ../services/gateway
+    container_name: sq-gateway
+    environment:
+      POSTGRES_HOST: timescaledb
+      POSTGRES_PORT: "5432"
+      POSTGRES_USER: ${POSTGRES_USER:-smartqueue}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_me_dev_only}
+      POSTGRES_DB: ${POSTGRES_DB:-smartqueue}
+      ML_SERVICE_URL: http://python-ml:8000
+      GATEWAY_API_KEY: ${GATEWAY_API_KEY:-dev_api_key_change_me}
+      DASHBOARD_ORIGIN: http://localhost:${DASHBOARD_PORT:-4200}
+    ports:
+      - "${GATEWAY_PORT:-5080}:8080"
+    depends_on:
+      timescaledb:
+        condition: service_healthy
+      python-ml:
+        condition: service_started
+    restart: unless-stopped
   # B6 da qo'shiladi: angular-nginx
 
 volumes:
