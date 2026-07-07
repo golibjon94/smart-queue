@@ -1,3 +1,6 @@
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using Npgsql;
 using SmartQueue.Gateway.Models;
 using SmartQueue.Gateway.Services;
@@ -6,8 +9,17 @@ var builder = WebApplication.CreateBuilder(args);
 var cfg = builder.Configuration;
 
 var mlUrl = cfg["ML_SERVICE_URL"] ?? "http://localhost:8000";
-var apiKey = cfg["GATEWAY_API_KEY"] ?? "dev_api_key_change_me";
 var dashboardOrigin = cfg["DASHBOARD_ORIGIN"] ?? "http://localhost:4200";
+
+// JWT — kalit kamida 32 belgidan (HS256). Prod'da albatta env orqali beriladi.
+var jwt = new JwtOptions
+{
+    Key = cfg["JWT_KEY"] ?? "dev-only-super-secret-jwt-signing-key-change-me-32b+",
+    ExpiryHours = int.Parse(cfg["JWT_EXPIRY_HOURS"] ?? "8"),
+};
+
+var adminUser = cfg["DEFAULT_ADMIN_USERNAME"] ?? "admin";
+var adminPass = cfg["DEFAULT_ADMIN_PASSWORD"] ?? "Admin!2026";
 
 var connString = new NpgsqlConnectionStringBuilder
 {
@@ -19,6 +31,8 @@ var connString = new NpgsqlConnectionStringBuilder
 }.ConnectionString;
 
 builder.Services.AddSingleton(NpgsqlDataSource.Create(connString));
+builder.Services.AddSingleton(jwt);
+builder.Services.AddScoped<AuthService>();
 builder.Services.AddSingleton<DemoStateService>();
 builder.Services.AddHttpClient<MlClient>(c =>
 {
@@ -28,24 +42,44 @@ builder.Services.AddHttpClient<MlClient>(c =>
 builder.Services.AddCors(o => o.AddDefaultPolicy(p =>
     p.WithOrigins(dashboardOrigin).AllowAnyHeader().AllowAnyMethod()));
 
-var app = builder.Build();
-app.UseCors();
-
-// Oddiy API-key himoyasi (Faza 0; to'liq JWT — Faza 1)
-app.Use(async (ctx, next) =>
-{
-    var path = ctx.Request.Path;
-    if (path != "/health" && HttpMethods.IsOptions(ctx.Request.Method) == false
-        && ctx.Request.Headers["X-Api-Key"] != apiKey)
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(opts =>
     {
-        ctx.Response.StatusCode = StatusCodes.Status401Unauthorized;
-        await ctx.Response.WriteAsJsonAsync(new { error = "X-Api-Key noto'g'ri yoki yo'q" });
-        return;
-    }
-    await next();
-});
+        opts.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = jwt.Issuer,
+            ValidAudience = jwt.Audience,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.Key)),
+            ClockSkew = TimeSpan.FromSeconds(30),
+        };
+    });
+builder.Services.AddAuthorization();
 
-// --- Health ---
+var app = builder.Build();
+
+// Default admin foydalanuvchisini yaratish (agar yo'q bo'lsa)
+using (var scope = app.Services.CreateScope())
+{
+    var auth = scope.ServiceProvider.GetRequiredService<AuthService>();
+    try
+    {
+        await auth.EnsureDefaultAdminAsync(adminUser, adminPass);
+    }
+    catch (Exception ex)
+    {
+        app.Logger.LogError(ex, "Default admin seed muvaffaqiyatsiz (DB tayyor emasmi?)");
+    }
+}
+
+app.UseCors();
+app.UseAuthentication();
+app.UseAuthorization();
+
+// --- Health (ochiq) ---
 app.MapGet("/health", async (NpgsqlDataSource db, MlClient ml) =>
 {
     var dbOk = false;
@@ -65,20 +99,45 @@ app.MapGet("/health", async (NpgsqlDataSource db, MlClient ml) =>
     });
 });
 
+// --- Auth: login (ochiq) ---
+app.MapPost("/api/auth/login", async (LoginRequest req, AuthService auth) =>
+{
+    if (string.IsNullOrWhiteSpace(req.Username) || string.IsNullOrWhiteSpace(req.Password))
+        return Results.BadRequest(new { error = "Login va parol majburiy" });
+
+    var result = await auth.LoginAsync(req.Username.Trim(), req.Password);
+    return result is null
+        ? Results.Json(new { error = "Login yoki parol noto'g'ri" }, statusCode: 401)
+        : Results.Ok(result);
+});
+
+// --- Auth: joriy foydalanuvchi (himoyalangan) ---
+app.MapGet("/api/auth/me", (HttpContext ctx) =>
+{
+    var u = ctx.User;
+    return Results.Ok(new
+    {
+        userId = u.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value,
+        username = u.Identity?.Name,
+        fullName = u.FindFirst("full_name")?.Value,
+        role = u.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value,
+    });
+}).RequireAuthorization();
+
 // --- Joriy navbat holati ---
 app.MapGet("/api/queue-state", async (int branchId, DemoStateService demo) =>
-    Results.Ok(await demo.GetStateAsync(branchId)));
+    Results.Ok(await demo.GetStateAsync(branchId))).RequireAuthorization();
 
 // --- Demo ssenariy almashtirish (normal | lunch_peak) ---
 app.MapPost("/api/demo/scenario", async (ScenarioRequest req, DemoStateService demo) =>
-    Results.Ok(await demo.SetScenarioAsync(req.BranchId, req.Scenario)));
+    Results.Ok(await demo.SetScenarioAsync(req.BranchId, req.Scenario))).RequireAuthorization();
 
 // --- Bashorat (ML proxy) ---
 app.MapGet("/api/forecast", async (int branchId, int? hours, int? serviceTypeId, MlClient ml) =>
 {
     var (code, body) = await ml.ForecastAsync(branchId, hours ?? 24, serviceTypeId);
     return Results.Content(body, "application/json", statusCode: code);
-});
+}).RequireAuthorization();
 
 // --- Tavsiyalarni yangilash: joriy holat -> ML -> DB + javob ---
 app.MapPost("/api/recommendations/refresh", async (int branchId,
@@ -90,7 +149,7 @@ app.MapPost("/api/recommendations/refresh", async (int branchId,
             q.ServiceTypeId, q.Waiting, q.OpenCounters, q.ArrivalsPerHour)).ToList());
     var (code, body) = await ml.RecommendationsAsync(req);
     return Results.Content(body, "application/json", statusCode: code);
-});
+}).RequireAuthorization();
 
 // --- Tavsiyalar ro'yxati (DB'dan) ---
 app.MapGet("/api/recommendations", async (int branchId, string? status, NpgsqlDataSource db) =>
@@ -124,7 +183,7 @@ app.MapGet("/api/recommendations", async (int branchId, string? status, NpgsqlDa
         });
     }
     return Results.Ok(result);
-});
+}).RequireAuthorization();
 
 // --- Menejer javobi: qabul / rad (audit izi) ---
 app.MapPost("/api/recommendations/{recId:long}/respond", async (long recId,
@@ -153,6 +212,6 @@ app.MapPost("/api/recommendations/{recId:long}/respond", async (long recId,
     return updated is null
         ? Results.NotFound(new { error = "Tavsiya topilmadi yoki allaqachon javob berilgan" })
         : Results.Ok(new { recId, status = req.Status });
-});
+}).RequireAuthorization();
 
 app.Run();
