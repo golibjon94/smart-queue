@@ -80,7 +80,15 @@ services:
       python-ml:
         condition: service_started
     restart: unless-stopped
-  # B6 da qo'shiladi: angular-nginx
+  angular-nginx:
+    build: ../apps/dashboard
+    container_name: sq-dashboard
+    ports:
+      - "${DASHBOARD_PORT:-4200}:80"
+    depends_on:
+      dotnet-gateway:
+        condition: service_started
+    restart: unless-stopped
 
 volumes:
   timescale_data:
