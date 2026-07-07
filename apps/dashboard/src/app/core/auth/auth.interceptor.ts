@@ -1,0 +1,28 @@
+import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
+import { inject } from '@angular/core';
+import { Router } from '@angular/router';
+import { catchError, throwError } from 'rxjs';
+
+import { AuthService } from './auth.service';
+
+/** Bearer token qo'shadi va 401 javobda login sahifasiga qaytaradi. */
+export const authInterceptor: HttpInterceptorFn = (req, next) => {
+  const auth = inject(AuthService);
+  const router = inject(Router);
+  const token = auth.token;
+
+  const authReq =
+    token && !req.url.includes('/api/auth/login')
+      ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
+      : req;
+
+  return next(authReq).pipe(
+    catchError((err: HttpErrorResponse) => {
+      if (err.status === 401 && !req.url.includes('/api/auth/login')) {
+        auth.logout();
+        router.navigate(['/login']);
+      }
+      return throwError(() => err);
+    }),
+  );
+};

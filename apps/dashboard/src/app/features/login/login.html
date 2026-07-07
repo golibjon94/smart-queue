@@ -1,0 +1,67 @@
+<div class="login-page">
+  <div class="login-card">
+    <div class="brand">
+      <div class="logo"><i class="pi pi-bolt"></i></div>
+      <h1>smart-queue</h1>
+      <p>Aqlli navbat boshqaruvi</p>
+    </div>
+
+    <form class="form" (ngSubmit)="submit()">
+      <div class="field">
+        <label for="username">Login</label>
+        <input
+          pInputText
+          id="username"
+          name="username"
+          autocomplete="username"
+          placeholder="admin"
+          [ngModel]="username()"
+          (ngModelChange)="username.set($event)"
+          fluid
+        />
+      </div>
+
+      <div class="field">
+        <label for="password">Parol</label>
+        <p-password
+          inputId="password"
+          name="password"
+          [ngModel]="password()"
+          (ngModelChange)="password.set($event)"
+          [feedback]="false"
+          [toggleMask]="true"
+          placeholder="••••••••"
+          fluid
+        />
+      </div>
+
+      @if (error(); as e) {
+        <p-message severity="error" [text]="e" styleClass="w-full" />
+      }
+
+      <p-button
+        type="submit"
+        label="Kirish"
+        icon="pi pi-sign-in"
+        [loading]="loading()"
+        styleClass="w-full login-btn"
+      />
+    </form>
+
+    <div class="hint">
+      <i class="pi pi-info-circle"></i>
+      Demo uchun: <code>admin</code> / <code>Admin!2026</code>
+    </div>
+  </div>
+
+  <div class="login-side">
+    <div class="side-content">
+      <h2>Bashorat qiladi. Boshqaradi. Maslahat beradi.</h2>
+      <ul>
+        <li><i class="pi pi-chart-line"></i> Mijoz oqimini oldindan ko'radi</li>
+        <li><i class="pi pi-sitemap"></i> Kassalarni real vaqtda optimallashtiradi</li>
+        <li><i class="pi pi-comments"></i> O'zbek tilida aniq tavsiya beradi</li>
+      </ul>
+    </div>
+  </div>
+</div>

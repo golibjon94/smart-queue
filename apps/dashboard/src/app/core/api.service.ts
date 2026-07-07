@@ -1,36 +1,32 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
 
-import { API_KEY, GATEWAY_URL } from './config';
+import { GATEWAY_URL } from './config';
 import { BranchState, ForecastResponse, RecView } from './models';
 
+// Auth (Bearer token) authInterceptor tomonidan avtomatik qo'shiladi.
 @Injectable({ providedIn: 'root' })
 export class ApiService {
   private http = inject(HttpClient);
-  private headers = new HttpHeaders({ 'X-Api-Key': API_KEY });
 
   getQueueState(branchId: number): Observable<BranchState> {
-    return this.http.get<BranchState>(
-      `${GATEWAY_URL}/api/queue-state?branchId=${branchId}`, { headers: this.headers });
+    return this.http.get<BranchState>(`${GATEWAY_URL}/api/queue-state?branchId=${branchId}`);
   }
 
   setScenario(branchId: number, scenario: string): Observable<BranchState> {
-    return this.http.post<BranchState>(
-      `${GATEWAY_URL}/api/demo/scenario`, { branchId, scenario }, { headers: this.headers });
+    return this.http.post<BranchState>(`${GATEWAY_URL}/api/demo/scenario`, { branchId, scenario });
   }
 
   getForecast(branchId: number, hours: number): Observable<ForecastResponse> {
     return this.http.get<ForecastResponse>(
-      `${GATEWAY_URL}/api/forecast?branchId=${branchId}&hours=${hours}`,
-      { headers: this.headers });
+      `${GATEWAY_URL}/api/forecast?branchId=${branchId}&hours=${hours}`);
   }
 
   /** Joriy holat bo'yicha yangi tavsiyalar yaratish (ML orqali). */
   refreshRecommendations(branchId: number): Observable<RecView[]> {
     return this.http.post<any>(
       `${GATEWAY_URL}/api/recommendations/refresh?branchId=${branchId}`, null,
-      { headers: this.headers },
     ).pipe(map(resp => (resp.recommendations ?? []).map((r: any): RecView => ({
       recId: r.rec_id,
       actionType: r.action_type,
@@ -47,7 +43,6 @@ export class ApiService {
     const q = status ? `&status=${status}` : '';
     return this.http.get<any[]>(
       `${GATEWAY_URL}/api/recommendations?branchId=${branchId}${q}`,
-      { headers: this.headers },
     ).pipe(map(rows => rows.map((r): RecView => ({
       recId: r.recId,
       actionType: r.actionType,
@@ -61,8 +56,7 @@ export class ApiService {
 
   respond(recId: number, status: 'accepted' | 'rejected'): Observable<unknown> {
     return this.http.post(
-      `${GATEWAY_URL}/api/recommendations/${recId}/respond`,
-      { status, respondedBy: 1 }, { headers: this.headers });
+      `${GATEWAY_URL}/api/recommendations/${recId}/respond`, { status, respondedBy: 1 });
   }
 
   private actionLabel(actionType: string, payload: any): string {
