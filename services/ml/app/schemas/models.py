@@ -5,6 +5,8 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field
 
+from recommend.config import DEFAULT_LOOKBACK_HOURS
+
 
 # --- /forecast ---
 
@@ -38,9 +40,17 @@ class ServiceStateIn(BaseModel):
     arrivals_per_hour: float | None = None
 
 
+class CounterStateIn(BaseModel):
+    counter_id: int
+    number: int
+    status: str = "idle"                        # serving | idle | closed
+    supported_service_types: list[int] = Field(default_factory=list)
+
+
 class RecommendationRequest(BaseModel):
     branch_id: int
     services: list[ServiceStateIn]
+    counters: list[CounterStateIn] | None = None   # JIQ uchun (ixtiyoriy)
 
 
 class RecommendationOut(BaseModel):
@@ -57,3 +67,27 @@ class RecommendationOut(BaseModel):
 class RecommendationResponse(BaseModel):
     branch_id: int
     recommendations: list[RecommendationOut]
+
+
+# --- /anomalies ---
+
+class AnomalyRequest(BaseModel):
+    branch_id: int
+    lookback_hours: int = Field(default=DEFAULT_LOOKBACK_HOURS, ge=1, le=168)
+
+
+class AnomalyOut(BaseModel):
+    branch_id: int
+    type: str                              # slow_operator | backlog | surge
+    severity: str                          # warning | serious | critical
+    service_type_id: int | None = None
+    counter_id: int | None = None
+    message: str
+    metric: float | None = None
+    expected: float | None = None
+    detected_at: datetime
+
+
+class AnomalyResponse(BaseModel):
+    branch_id: int
+    anomalies: list[AnomalyOut]

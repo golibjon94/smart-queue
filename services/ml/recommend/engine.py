@@ -1,13 +1,19 @@
-"""Tavsiya dvigateli (Faza 0: sodda qoidalar + Erlang-C).
+"""Tavsiya dvigateli (Faza 0 qoidalari + Faza 1 JIQ marshrutlash).
 
 Har tavsiya majburiy formatda: ACTION + REASON + EXPECTED BENEFIT.
 Tavsiyalar recommendations jadvaliga 'proposed' statusi bilan yoziladi.
+
+Qoidalar:
+  JIQ (route_queue) - bo'sh (idle) mos kassa bo'lsa navbatni o'sha kassaga yo'naltirish
+  open_counter      - kutish chegaradan oshsa zaxira kassa ochish
+  close_counter     - navbat bo'sh, kassalar ortiqcha bo'lsa bittasini bo'shatish
 """
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
+from .config import JIQ_MIN_BENEFIT_SEC, JIQ_MIN_WAITING, WAIT_CAP_SEC
 from .erlang import avg_wait_sec
 
 WAIT_THRESHOLD_SEC = 600      # 10 daqiqadan ortiq kutish -> harakat kerak
@@ -19,8 +25,17 @@ IDLE_CLOSE_THRESHOLD = 2      # navbat bo'sh bo'lsa va 2+ kassa ochiq bo'lsa -> 
 class ServiceState:
     service_type_id: int
     waiting: int                    # hozir navbatda turganlar
-    open_counters: int              # shu xizmatga ochiq kassalar
+    open_counters: int              # shu xizmatga xizmat qilayotgan kassalar
     arrivals_per_hour: float | None = None  # ma'lum bo'lsa (forecast'dan)
+
+
+@dataclass
+class CounterState:
+    """JIQ uchun kassa-daraja holati (FAZA1_UMUMIY §5.2)."""
+    counter_id: int
+    number: int
+    status: str                     # serving | idle | closed
+    supported_service_types: list[int] = field(default_factory=list)
 
 
 def _estimate_wait(lam: float, mu: float, c: int, waiting: int,
@@ -34,7 +49,22 @@ def _estimate_wait(lam: float, mu: float, c: int, waiting: int,
     return max(stationary, drain)
 
 
-def make_recommendations(conn, branch_id: int, states: list[ServiceState]) -> list[dict]:
+def _capped(sec: float) -> float:
+    """Hisobot uchun kutishni cheklash (∞ ni JSON'ga chiqarmaslik)."""
+    return min(sec, float(WAIT_CAP_SEC))
+
+
+def _pick_idle(idle: list[CounterState], service_type_id: int) -> CounterState | None:
+    """Xizmatga mos bo'sh kassalardan eng "arzon"i (eng ixtisoslashgan, so'ng
+    eng kichik raqamli) — skill-based marshrutlash."""
+    candidates = [c for c in idle if service_type_id in c.supported_service_types]
+    if not candidates:
+        return None
+    return min(candidates, key=lambda c: (len(c.supported_service_types), c.number))
+
+
+def make_recommendations(conn, branch_id: int, states: list[ServiceState],
+                         counters: list[CounterState] | None = None) -> list[dict]:
     with conn.cursor() as cur:
         cur.execute("SELECT service_type_id, name, avg_service_time_sec FROM service_types")
         svc = {r[0]: {"name": r[1], "avg_sec": r[2]} for r in cur.fetchall()}
@@ -43,15 +73,27 @@ def make_recommendations(conn, branch_id: int, states: list[ServiceState]) -> li
                FROM counters WHERE branch_id = %s ORDER BY number""",
             (branch_id,),
         )
-        counters = cur.fetchall()
+        db_counters = cur.fetchall()
 
     # Ochilishi mumkin bo'lgan zaxira kassalar (hozir faol emas)
     reserve = [
         {"counter_id": r[0], "number": r[1], "name": r[2], "supported": set(r[4] or [])}
-        for r in counters if not r[3]
+        for r in db_counters if not r[3]
     ]
 
+    recs = _build_recommendations(svc, reserve, counters or [], states)
+    _persist(conn, branch_id, recs)
+    return recs
+
+
+def _build_recommendations(svc: dict, reserve: list[dict],
+                           counters: list[CounterState],
+                           states: list[ServiceState]) -> list[dict]:
+    """Sof qaror mantig'i (DB'siz — test qilinadi)."""
+    idle = [c for c in counters if c.status == "idle"]
+    routed: set[int] = set()
     recs: list[dict] = []
+
     for st in states:
         info = svc.get(st.service_type_id)
         if info is None:
@@ -61,8 +103,39 @@ def make_recommendations(conn, branch_id: int, states: list[ServiceState]) -> li
         lam = ((st.arrivals_per_hour or max(st.waiting * 2.0, 1.0)) / 3600.0)
         est_wait = _estimate_wait(lam, mu, st.open_counters, st.waiting, avg_sec)
 
+        # QOIDA 0 (JIQ): bo'sh mos kassa bo'lsa navbatni o'sha kassaga yo'naltir
+        if st.waiting >= JIQ_MIN_WAITING:
+            cand = _pick_idle(idle, st.service_type_id)
+            if cand is not None:
+                new_wait = _estimate_wait(lam, mu, st.open_counters + 1,
+                                          st.waiting, avg_sec)
+                benefit = est_wait - new_wait
+                if benefit >= JIQ_MIN_BENEFIT_SEC:
+                    idle.remove(cand)
+                    routed.add(st.service_type_id)
+                    recs.append({
+                        "action_type": "route_queue",
+                        "action": (f"«{info['name']}» navbatini "
+                                   f"{cand.number}-kassaga yo'naltiring (bo'sh)"),
+                        "reason": (f"«{info['name']}» navbatida {st.waiting} kishi "
+                                   f"kutmoqda, {cand.number}-kassa bo'sh"),
+                        "expected_benefit": {
+                            "wait_reduction_min": round(_capped(benefit) / 60, 1),
+                            "wait_before_min": round(_capped(est_wait) / 60, 1),
+                            "wait_after_min": round(_capped(new_wait) / 60, 1),
+                        },
+                        "action_payload": {
+                            "service_type_id": st.service_type_id,
+                            "to_counter_id": cand.counter_id,
+                            "to_counter_number": cand.number,
+                        },
+                    })
+                    continue  # bu xizmat hal bo'ldi -> kassa ochishga hojat yo'q
+
         # QOIDA 1: kutish chegaradan oshdi -> zaxira kassa ochish
         if est_wait > WAIT_THRESHOLD_SEC:
+            if st.service_type_id in routed:
+                continue  # JIQ allaqachon quvvat qo'shdi -> ziddiyatsizlik
             candidate = next(
                 (r for r in reserve if st.service_type_id in r["supported"]), None)
             if candidate is not None:
@@ -75,11 +148,11 @@ def make_recommendations(conn, branch_id: int, states: list[ServiceState]) -> li
                         "action_type": "open_counter",
                         "action": f"{candidate['number']}-kassani oching",
                         "reason": (f"«{info['name']}» navbatida {st.waiting} kishi, "
-                                   f"taxminiy kutish ~{est_wait / 60:.0f} daqiqa"),
+                                   f"taxminiy kutish ~{_capped(est_wait) / 60:.0f} daqiqa"),
                         "expected_benefit": {
-                            "wait_reduction_min": round(benefit / 60, 1),
-                            "wait_before_min": round(est_wait / 60, 1),
-                            "wait_after_min": round(new_wait / 60, 1),
+                            "wait_reduction_min": round(_capped(benefit) / 60, 1),
+                            "wait_before_min": round(_capped(est_wait) / 60, 1),
+                            "wait_after_min": round(_capped(new_wait) / 60, 1),
                         },
                         "action_payload": {
                             "counter_id": candidate["counter_id"],
@@ -99,12 +172,11 @@ def make_recommendations(conn, branch_id: int, states: list[ServiceState]) -> li
                     "reason": f"«{info['name']}» navbati bo'sh, {st.open_counters} ta kassa ochiq",
                     "expected_benefit": {
                         "freed_counters": 1,
-                        "wait_after_min": round(new_wait / 60, 1),
+                        "wait_after_min": round(_capped(new_wait) / 60, 1),
                     },
                     "action_payload": {"service_type_id": st.service_type_id},
                 })
 
-    _persist(conn, branch_id, recs)
     return recs
 
 

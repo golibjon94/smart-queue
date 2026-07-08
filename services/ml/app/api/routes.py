@@ -7,10 +7,14 @@ import joblib
 import psycopg
 from fastapi import APIRouter, Depends, HTTPException
 
-from recommend.engine import ServiceState, make_recommendations
+from recommend.anomaly import detect_anomalies
+from recommend.engine import CounterState, ServiceState, make_recommendations
 
 from ..core.db import get_conn
 from ..schemas.models import (
+    AnomalyOut,
+    AnomalyRequest,
+    AnomalyResponse,
     ForecastPoint,
     ForecastRequest,
     ForecastResponse,
@@ -93,8 +97,28 @@ def recommendations(req: RecommendationRequest,
         )
         for s in req.services
     ]
-    recs = make_recommendations(conn, req.branch_id, states)
+    counters = [
+        CounterState(
+            counter_id=c.counter_id,
+            number=c.number,
+            status=c.status,
+            supported_service_types=c.supported_service_types,
+        )
+        for c in (req.counters or [])
+    ]
+    recs = make_recommendations(conn, req.branch_id, states, counters)
     return RecommendationResponse(
         branch_id=req.branch_id,
         recommendations=[RecommendationOut(**r) for r in recs],
+    )
+
+
+@router.post("/anomalies", response_model=AnomalyResponse)
+def anomalies(req: AnomalyRequest,
+              conn: psycopg.Connection = Depends(get_conn)) -> AnomalyResponse:
+    """EWMA anomaliya aniqlash (surge / backlog / slow_operator)."""
+    found = detect_anomalies(conn, req.branch_id, req.lookback_hours)
+    return AnomalyResponse(
+        branch_id=req.branch_id,
+        anomalies=[AnomalyOut(**a) for a in found],
     )

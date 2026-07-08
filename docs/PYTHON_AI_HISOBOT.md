@@ -159,7 +159,8 @@ Tashqi dunyoga (aslida .NET gateway'ga) REST interfeys:
 |----------|--------|
 | `GET /health` | holat + DB tekshiruvi + model versiyasi |
 | `POST /forecast` | filial+vaqt oralig'i uchun bashorat + ishonch oralig'i (`forecasts` jadvalidan) |
-| `POST /recommendations` | joriy holat → tavsiyalar (ACTION+REASON+BENEFIT) |
+| `POST /recommendations` | joriy holat → tavsiyalar (ACTION+REASON+BENEFIT); Faza 1'da JIQ uchun `counters` qo'shildi |
+| `POST /anomalies` | *(Faza 1)* EWMA anomaliya aniqlash (surge / backlog / slow_operator) — §8b.3 |
 
 - Pydantic modellari bilan kirish/chiqish validatsiyasi (`app/schemas/`).
 - DB ulanish dependency injection orqali (`app/core/db.py`).
@@ -207,13 +208,62 @@ Docker'da bu servis `python-ml` konteyneri sifatida avtomatik ishlaydi (Swagger:
 
 ---
 
+## 8b. Faza 1 — real-vaqt aql (JIQ marshrutlash + EWMA anomaliya)
+
+Faza 1'da ML servisi ikki yangi "aqlli" imkoniyat va bitta yangi endpoint bilan
+kengaytirildi. Kontrakt: [`docs/faza1/FAZA1_UMUMIY.md`](faza1/FAZA1_UMUMIY.md)
+(§5–§7, snake_case). Yangi sozlanadigan raqamlar bitta joyda —
+[`recommend/config.py`](../services/ml/recommend/config.py).
+
+### 8b.1 JIQ marshrutlash — `recommend/engine.py`
+**Join-the-Idle-Queue:** navbatda odam kutayotgan xizmat uchun **bo'sh (idle)** va
+**ko'nikmasi mos** kassa bo'lsa, o'sha navbatni shu kassaga yo'naltirish tavsiya
+qilinadi — kassa ochishdan ko'ra arzonroq harakat.
+- `/recommendations` so'roviga ixtiyoriy **`counters`** massivi qo'shildi
+  (`counter_id, number, status ∈ {serving|idle|closed}, supported_service_types`).
+  Berilmasa — eski xatti-harakat (orqaga to'liq mos).
+- Yangi `action_type = "route_queue"`, payload `{service_type_id, to_counter_id,
+  to_counter_number}`. Foyda Erlang-C/Little bilan miqdoriy: `c → c+1` server.
+- Bir nechta mos bo'sh kassadan **eng ixtisoslashgani** (so'ng eng kichik raqamli)
+  tanlanadi; bitta bo'sh kassa ikki navbatga bo'linmaydi.
+- **Ziddiyatsizlik:** JIQ yo'naltirilgan xizmat uchun `open_counter` taklif etilmaydi
+  (idle kassa allaqachon quvvat qo'shdi); `open_counter`/`close_counter` qoidalari saqlanadi.
+- Sof qaror mantig'i `_build_recommendations` — DB'siz test qilinadi.
+
+### 8b.2 EWMA anomaliya — `recommend/anomaly.py`
+Prognoz xatoligi ustida **EWMA control chart** (λ=0.3, L=3):
+`S_t = λ·z_t + (1−λ)·S_{t−1}`, chegara `±L·σ·√(λ/(2−λ))`.
+- **surge:** soatlik qoldiq `z_t = actual − forecast` (forecasts jadvalidan) yuqori
+  chegaradan oshsa — kutilmagan kelish portlashi.
+- **backlog:** surge sodir bo'lib, ayni paytda **kutish o'sib borsa** — navbat to'planishi.
+- **slow_operator:** kassaning o'rtacha `service_time_sec` xizmat turining bazaviy
+  (`service_types.avg_service_time_sec`) qiymatidan ≥30% yuqori bo'lsa.
+- Har anomaliya `type, severity ∈ {warning|serious|critical}, message` (o'zbekcha),
+  `metric, expected, detected_at` bilan (§7.3). `ewma_control_chart` — sof funksiya.
+
+### 8b.3 Yangi endpoint — `POST /anomalies`
+So'rov `{branch_id, lookback_hours?}` → javob `{branch_id, anomalies: [...]}` (snake_case).
+`hourly_arrivals` + `forecasts` + `queue_events` jadvallaridan o'qiydi; oyna eng so'nggi
+mavjud soatga bog'lanadi ("oxirgi hodisalar" — soat devoridan mustaqil).
+
+### 8b.4 Testlar va verifikatsiya
+- Yangi unit testlar: [`tests/test_jiq.py`](../services/ml/tests/test_jiq.py) (6 ta —
+  yo'naltirish, skill mosligi, ziddiyatsizlik, orqaga moslik),
+  [`tests/test_anomaly.py`](../services/ml/tests/test_anomaly.py) (7 ta — EWMA breach/no-breach,
+  yetarsiz nuqta, nol dispersiya, `wait_rising`). `pytest`: **24/24 yashil**.
+- Jonli tekshirish: `/recommendations` `counters` bilan → `route_queue` tavsiyasini
+  qaytardi; `/anomalies` haqiqiy tarixiy portlashlar (masalan oy oxiri maosh kuni,
+  actual 80 vs seasonal 50) ustida `surge`/`backlog` aniqladi.
+
+---
+
 ## 9. Keyingi fazalarga qoldirilgan (scope)
 
-Bular ataylab **Faza 0**ga kiritilmagan (ROADMAP bo'yicha):
+Bular ataylab keyingi fazalarga qoldirilgan (ROADMAP bo'yicha):
 - **Prophet / StatsForecast** fallback va champion-challenger tanlash → Faza 2.
 - **Retraining scheduler** (APScheduler/Prefect), drift monitoring → Faza 2.
-- **EWMA anomaliya aniqlash** (sekin operator, backlog) → Faza 1.
-- **To'liq JIQ marshrutlash**, OR-Tools/LP optimallashtirish → Faza 1+.
+- ✅ **EWMA anomaliya aniqlash** (surge / backlog / slow_operator) → **Faza 1'da bajarildi** (§8b.2).
+- ✅ **JIQ marshrutlash** (`route_queue`) → **Faza 1'da bajarildi** (§8b.1). OR-Tools/LP optimallashtirish → Faza 1+.
 - **Real ma'lumot ETL** (`source='real'`, migratsiya kerak emas) → Faza 2.
 - **ONNX** eksport (2–10x tezlik) → o'sishda.
 
