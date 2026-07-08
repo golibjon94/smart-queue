@@ -9,9 +9,13 @@ from dotenv import load_dotenv
 
 from .queue_sim import CounterInfo
 
-# Repo ildizidagi .env ni yuklash (services/ml/simulation -> 3 pog'ona yuqori)
-_REPO_ROOT = Path(__file__).resolve().parents[3]
-load_dotenv(_REPO_ROOT / ".env")
+# Lokal dev'da repo ildizidagi .env ni yuklash — yuqoriga qarab qidiramiz.
+# Docker'da .env bo'lmaydi (env compose'dan keladi), shuning uchun topilmasa hech narsa qilinmaydi.
+for _parent in Path(__file__).resolve().parents:
+    _candidate = _parent / ".env"
+    if _candidate.exists():
+        load_dotenv(_candidate)
+        break
 
 COPY_COLUMNS = (
     "event_time, ticket_id, branch_id, service_type_id, counter_id, "
