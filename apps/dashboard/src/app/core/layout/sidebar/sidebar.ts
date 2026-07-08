@@ -17,7 +17,7 @@ import { NAV_ITEMS } from '../nav';
       <div class="flex items-center gap-3" style="padding:6px 8px 20px;" [style.justify-content]="collapsed() ? 'center' : ''">
         <div
           class="relative grid shrink-0 place-items-center"
-          style="height:42px;width:42px;border-radius:13px;background:conic-gradient(from 140deg,var(--accent-a),var(--accent-b),var(--accent-c),var(--accent-a));box-shadow:0 8px 26px -8px rgba(var(--b-rgb),.8);"
+          style="height:42px;width:42px;border-radius:13px;background:conic-gradient(from 140deg,var(--accent-d),var(--accent-a),var(--accent-b),var(--accent-c));box-shadow:0 8px 26px -8px rgba(var(--d-rgb),.8);"
         >
           <div class="absolute" style="inset:2px;border-radius:11px;background:var(--bg);"></div>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="relative">
@@ -56,13 +56,13 @@ import { NAV_ITEMS } from '../nav';
           @if (rla.isActive) {
             <span
               class="absolute"
-              style="left:0;top:9px;bottom:9px;width:3px;border-radius:9px;background:linear-gradient(var(--accent-a),var(--accent-c));"
+              style="left:0;top:9px;bottom:9px;width:3px;border-radius:9px;background:linear-gradient(var(--accent-d),var(--accent-b));"
             ></span>
           }
           <i
             [class]="item.icon"
             style="font-size:17px;"
-            [style.color]="rla.isActive ? 'var(--accent-a)' : 'currentColor'"
+            [style.color]="rla.isActive ? 'var(--accent-d)' : 'currentColor'"
           ></i>
           @if (!collapsed()) {
             <span style="flex:1;">{{ item.label }}</span>
@@ -86,7 +86,7 @@ import { NAV_ITEMS } from '../nav';
           <div class="relative shrink-0" style="width:38px;height:38px;">
             <div class="absolute" style="inset:0;border-radius:50%;border:1.5px solid transparent;border-top-color:var(--accent-a);border-right-color:var(--accent-b);animation:sq-spin 3s linear infinite;"></div>
             <div class="absolute" style="inset:5px;border-radius:50%;border:1.5px solid transparent;border-bottom-color:var(--accent-c);border-left-color:var(--accent-b);animation:sq-spin-rev 2.4s linear infinite;"></div>
-            <div class="absolute" style="inset:12px;border-radius:50%;background:radial-gradient(circle,#fff,var(--accent-b));box-shadow:0 0 14px var(--accent-b);animation:sq-pulse 2s ease-in-out infinite;"></div>
+            <div class="absolute" style="inset:12px;border-radius:50%;background:radial-gradient(circle,#fff,var(--accent-d));box-shadow:0 0 14px var(--accent-d);animation:sq-pulse 2s ease-in-out infinite;"></div>
           </div>
           @if (!collapsed()) {
             <div style="line-height:1.3;">

@@ -1,92 +1,192 @@
-<div class="grid h-full grid-cols-1 md:grid-cols-2">
-  <!-- Chap: forma -->
-  <div class="mx-auto flex w-full max-w-[460px] flex-col justify-center gap-7 px-14 py-12">
-    <div class="text-center">
-      <div
-        class="mx-auto mb-3.5 grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-primary-500 to-primary-700 text-[26px] text-white"
+<app-neural-background />
+<div
+  class="pointer-events-none fixed inset-0"
+  style="z-index:0;background:radial-gradient(circle at 50% 50%, transparent 52%, var(--vignette) 100%);"
+></div>
+
+<div class="relative grid min-h-screen grid-cols-1 md:grid-cols-2" style="z-index:2;">
+  <!-- LEFT — forma -->
+  <div class="sq-rise flex flex-col justify-center px-6 py-12">
+    <div class="mx-auto w-full" style="max-width:430px;">
+      <!-- brand -->
+      <div class="text-center" style="margin-bottom:26px;">
+        <div
+          class="relative mx-auto grid place-items-center"
+          style="width:60px;height:60px;border-radius:17px;background:conic-gradient(from 140deg,var(--accent-d),var(--accent-a),var(--accent-b),var(--accent-c));box-shadow:0 12px 34px -8px rgba(var(--d-rgb),.7);"
+        >
+          <div class="absolute" style="inset:2.5px;border-radius:15px;background:#121614;"></div>
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" class="relative">
+            <path d="M13 2 4 14h7l-1 8 9-12h-7l1-8Z" fill="url(#lg)" />
+            <defs>
+              <linearGradient id="lg" x1="0" y1="0" x2="24" y2="24">
+                <stop style="stop-color:var(--accent-d)" />
+                <stop offset="1" style="stop-color:var(--accent-c)" />
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <h1 style="margin:16px 0 0;font-family:var(--font-display,'Space Grotesk');font-weight:700;font-size:28px;letter-spacing:-.3px;color:var(--text);">smart-queue</h1>
+        <p style="margin:6px 0 0;font-size:13.5px;color:var(--text-dim);">Aqlli navbat boshqaruvi</p>
+      </div>
+
+      <!-- glass card -->
+      <form
+        class="flex flex-col gap-4"
+        style="border-radius:22px;padding:26px 24px;background:linear-gradient(160deg,var(--panel-1),var(--panel-2));border:1px solid var(--border);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:0 30px 60px -30px rgba(0,0,0,.6),var(--inset);"
+        (ngSubmit)="submit()"
       >
-        <i class="pi pi-bolt"></i>
+        <div class="flex flex-col gap-[7px]">
+          <label for="username" style="font-size:12px;font-weight:600;color:var(--text-dim);">Login</label>
+          <input
+            id="username"
+            name="username"
+            class="sq-input"
+            autocomplete="username"
+            placeholder="admin"
+            [ngModel]="username()"
+            (ngModelChange)="username.set($event)"
+          />
+        </div>
+
+        <div class="flex flex-col gap-[7px]">
+          <label for="password" style="font-size:12px;font-weight:600;color:var(--text-dim);">Parol</label>
+          <div class="relative">
+            <input
+              id="password"
+              name="password"
+              class="sq-input"
+              style="padding-right:44px;"
+              [type]="showPassword() ? 'text' : 'password'"
+              autocomplete="current-password"
+              placeholder="••••••••"
+              [ngModel]="password()"
+              (ngModelChange)="password.set($event)"
+            />
+            <button
+              type="button"
+              class="sq-mini absolute grid place-items-center"
+              style="right:6px;top:6px;width:36px;height:36px;border-radius:9px;border:none;background:transparent;color:var(--text-mut);cursor:pointer;"
+              [title]="showPassword() ? 'Yashirish' : 'Ko‘rsatish'"
+              (click)="showPassword.set(!showPassword())"
+            >
+              <i [class]="showPassword() ? 'pi pi-eye-slash' : 'pi pi-eye'" style="font-size:15px;"></i>
+            </button>
+          </div>
+        </div>
+
+        @if (error(); as e) {
+          <div
+            class="flex items-center gap-2.5"
+            style="padding:10px 13px;border-radius:11px;background:rgba(var(--c-rgb),.1);border:1px solid rgba(var(--c-rgb),.3);color:var(--danger);font-size:12.5px;"
+          >
+            <i class="pi pi-exclamation-triangle" style="font-size:14px;"></i>
+            {{ e }}
+          </div>
+        }
+
+        <button
+          type="submit"
+          class="sq-btn flex items-center justify-center gap-2.5"
+          style="height:50px;margin-top:4px;border:none;border-radius:13px;cursor:pointer;font-family:var(--font-display,'Space Grotesk');font-weight:600;font-size:14.5px;color:var(--ok-ink);background:var(--grad);box-shadow:0 12px 32px -12px rgba(var(--d-rgb),.75);"
+          [disabled]="loading()"
+        >
+          @if (loading()) {
+            <i class="pi pi-spin pi-spinner" style="font-size:15px;"></i> Kirilmoqda…
+          } @else {
+            <i class="pi pi-sign-in" style="font-size:15px;"></i> Kirish
+          }
+        </button>
+      </form>
+
+      <!-- demo hint -->
+      <div class="text-center" style="margin-top:18px;font-size:12.5px;color:var(--text-mut);">
+        Demo uchun:
+        <code style="font-family:var(--font-mono,'JetBrains Mono');font-size:11.5px;padding:2px 7px;border-radius:6px;background:var(--chip);border:1px solid var(--chip-bd);color:var(--ok);">admin</code>
+        /
+        <code style="font-family:var(--font-mono,'JetBrains Mono');font-size:11.5px;padding:2px 7px;border-radius:6px;background:var(--chip);border:1px solid var(--chip-bd);color:var(--ok);">Admin!2026</code>
       </div>
-      <h1 class="m-0 text-[26px] font-bold tracking-tight text-surface-900 dark:text-surface-0">
-        smart-queue
-      </h1>
-      <p class="mt-1 text-sm text-surface-500 dark:text-surface-400">Aqlli navbat boshqaruvi</p>
-    </div>
-
-    <form class="flex flex-col gap-[18px]" (ngSubmit)="submit()">
-      <div class="flex flex-col gap-[7px]">
-        <label for="username" class="text-[13px] font-semibold text-surface-900 dark:text-surface-0">
-          Login
-        </label>
-        <input
-          pInputText
-          id="username"
-          name="username"
-          autocomplete="username"
-          placeholder="admin"
-          [ngModel]="username()"
-          (ngModelChange)="username.set($event)"
-          fluid
-        />
-      </div>
-
-      <div class="flex flex-col gap-[7px]">
-        <label for="password" class="text-[13px] font-semibold text-surface-900 dark:text-surface-0">
-          Parol
-        </label>
-        <p-password
-          inputId="password"
-          name="password"
-          [ngModel]="password()"
-          (ngModelChange)="password.set($event)"
-          [feedback]="false"
-          [toggleMask]="true"
-          placeholder="••••••••"
-          fluid
-        />
-      </div>
-
-      @if (error(); as e) {
-        <p-message severity="error" [text]="e" styleClass="w-full" />
-      }
-
-      <p-button
-        type="submit"
-        label="Kirish"
-        icon="pi pi-sign-in"
-        [loading]="loading()"
-        styleClass="mt-1 w-full"
-      />
-    </form>
-
-    <div class="text-center text-[13px] text-surface-500 dark:text-surface-400">
-      <i class="pi pi-info-circle"></i>
-      Demo uchun:
-      <code class="rounded bg-surface-100 px-1.5 py-0.5 text-xs text-surface-900 dark:bg-surface-800 dark:text-surface-0">admin</code>
-      /
-      <code class="rounded bg-surface-100 px-1.5 py-0.5 text-xs text-surface-900 dark:bg-surface-800 dark:text-surface-0">Admin!2026</code>
     </div>
   </div>
 
-  <!-- O'ng: brend paneli -->
+  <!-- RIGHT — brand panel -->
   <div
-    class="flex items-center bg-gradient-to-br from-primary-600 to-primary-800 p-12 text-white max-md:hidden"
+    class="relative flex flex-col justify-center overflow-hidden max-md:hidden"
+    style="padding:56px;border-left:1px solid var(--border);background:linear-gradient(150deg,rgba(var(--a-rgb),.16),rgba(var(--b-rgb),.10) 55%,rgba(var(--c-rgb),.12)),linear-gradient(160deg,#111917,#0e1512);"
   >
-    <div class="mx-auto max-w-[400px]">
-      <h2 class="mb-7 text-3xl font-bold leading-tight">
-        Bashorat qiladi. Boshqaradi. Maslahat beradi.
+    <div class="absolute" style="top:-90px;right:-90px;width:360px;height:360px;border-radius:50%;background:radial-gradient(circle,rgba(var(--d-rgb),.22),transparent 68%);"></div>
+    <div class="absolute" style="bottom:-110px;left:-90px;width:380px;height:380px;border-radius:50%;background:radial-gradient(circle,rgba(var(--c-rgb),.18),transparent 68%);"></div>
+
+    <!-- AI Spectrum — dekorativ, kontent ortida (faqat CSS) -->
+    <div
+      class="pointer-events-none absolute"
+      style="top:50%;right:-70px;transform:translateY(-50%);width:560px;height:560px;opacity:.75;"
+    >
+      <div class="absolute" style="inset:0;border-radius:50%;background:conic-gradient(from 0deg, rgba(var(--d-rgb),0), rgba(var(--d-rgb),.55), rgba(var(--a-rgb),.55), rgba(var(--b-rgb),.55), rgba(var(--c-rgb),.55), rgba(var(--warn-rgb),.4), rgba(var(--d-rgb),0));filter:blur(34px);animation:sq-spin 30s linear infinite;"></div>
+      <div class="absolute" style="inset:90px;border-radius:50%;background:conic-gradient(from 140deg, transparent, rgba(var(--a-rgb),.42) 30%, transparent 62%);filter:blur(10px);animation:sq-spin-rev 22s linear infinite;"></div>
+      <div class="absolute" style="inset:150px;border-radius:50%;border:1px solid rgba(var(--d-rgb),.22);box-shadow:inset 0 0 44px rgba(var(--d-rgb),.16);animation:sq-spin 40s linear infinite;"></div>
+      <div class="absolute" style="inset:212px;border-radius:50%;border:1px dashed rgba(var(--b-rgb),.22);animation:sq-spin-rev 34s linear infinite;"></div>
+      <div class="absolute" style="inset:256px;border-radius:50%;background:radial-gradient(circle, rgba(var(--d-rgb),.5), transparent 70%);filter:blur(6px);animation:sq-pulse 3s ease-in-out infinite;"></div>
+    </div>
+
+    <div class="relative" style="max-width:440px;z-index:2;">
+      <span
+        class="inline-flex items-center gap-2"
+        style="font-family:var(--font-mono,'JetBrains Mono');font-size:10.5px;letter-spacing:1.4px;text-transform:uppercase;color:var(--accent-d);padding:6px 12px;border-radius:99px;background:rgba(var(--d-rgb),.12);border:1px solid rgba(var(--d-rgb),.28);"
+      >
+        <span style="width:6px;height:6px;border-radius:50%;background:var(--accent-d);animation:sq-pulsedot-aqua 2s infinite;"></span>
+        AI-powered · LightGBM
+      </span>
+
+      <h2 style="margin:22px 0 0;font-family:var(--font-display,'Space Grotesk');font-weight:700;font-size:38px;line-height:1.18;letter-spacing:-.5px;color:var(--text);">
+        Bashorat qiladi.<br />
+        <span style="background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;">Boshqaradi. Maslahat beradi.</span>
       </h2>
-      <ul class="m-0 flex list-none flex-col gap-4 p-0">
-        <li class="flex items-center gap-3 text-[15px] opacity-95">
-          <i class="pi pi-chart-line w-[22px] text-lg"></i> Mijoz oqimini oldindan ko'radi
+
+      <ul class="m-0 flex list-none flex-col gap-4 p-0" style="margin-top:30px;">
+        <li class="flex items-center gap-3.5" style="font-size:15px;color:var(--text-dim);">
+          <span class="grid shrink-0 place-items-center" style="width:42px;height:42px;border-radius:12px;background:linear-gradient(150deg,rgba(var(--d-rgb),.22),rgba(var(--d-rgb),.05));border:1px solid rgba(var(--d-rgb),.3);">
+            <i class="pi pi-chart-line" style="font-size:18px;color:var(--accent-d);"></i>
+          </span>
+          Mijoz oqimini oldindan ko'radi
         </li>
-        <li class="flex items-center gap-3 text-[15px] opacity-95">
-          <i class="pi pi-sitemap w-[22px] text-lg"></i> Kassalarni real vaqtda optimallashtiradi
+        <li class="flex items-center gap-3.5" style="font-size:15px;color:var(--text-dim);">
+          <span class="grid shrink-0 place-items-center" style="width:42px;height:42px;border-radius:12px;background:linear-gradient(150deg,rgba(var(--a-rgb),.22),rgba(var(--a-rgb),.05));border:1px solid rgba(var(--a-rgb),.3);">
+            <i class="pi pi-sitemap" style="font-size:18px;color:var(--accent-a);"></i>
+          </span>
+          Kassalarni real vaqtda optimallashtiradi
         </li>
-        <li class="flex items-center gap-3 text-[15px] opacity-95">
-          <i class="pi pi-comments w-[22px] text-lg"></i> O'zbek tilida aniq tavsiya beradi
+        <li class="flex items-center gap-3.5" style="font-size:15px;color:var(--text-dim);">
+          <span class="grid shrink-0 place-items-center" style="width:42px;height:42px;border-radius:12px;background:linear-gradient(150deg,rgba(var(--c-rgb),.22),rgba(var(--c-rgb),.05));border:1px solid rgba(var(--c-rgb),.3);">
+            <i class="pi pi-comments" style="font-size:18px;color:var(--accent-c);"></i>
+          </span>
+          O'zbek tilida aniq tavsiya beradi
         </li>
       </ul>
+
+      <!-- mini stat card -->
+      <div
+        class="flex items-center gap-4"
+        style="margin-top:34px;border-radius:16px;padding:18px;background:linear-gradient(160deg,var(--panel-1),var(--panel-2));border:1px solid var(--border);box-shadow:var(--inset);"
+      >
+        <div class="relative shrink-0" style="width:44px;height:44px;">
+          <div class="absolute" style="inset:0;border-radius:50%;border:1.5px solid transparent;border-top-color:var(--accent-d);border-right-color:var(--accent-a);animation:sq-spin 3s linear infinite;"></div>
+          <div class="absolute" style="inset:6px;border-radius:50%;border:1.5px solid transparent;border-bottom-color:var(--accent-c);border-left-color:var(--accent-b);animation:sq-spin-rev 2.4s linear infinite;"></div>
+          <div class="absolute" style="inset:14px;border-radius:50%;background:radial-gradient(circle,#fff,var(--accent-d));box-shadow:0 0 12px var(--accent-d);animation:sq-pulse 2s ease-in-out infinite;"></div>
+        </div>
+        <div class="flex-1">
+          <div style="font-size:11.5px;color:var(--text-dim);">Bugungi bashorat aniqligi</div>
+          <div style="font-family:var(--font-display,'Space Grotesk');font-weight:700;font-size:26px;line-height:1.1;color:var(--text);">94.2%</div>
+        </div>
+        <svg viewBox="0 0 90 32" preserveAspectRatio="none" style="width:90px;height:30px;">
+          <defs>
+            <linearGradient id="lspark" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0" style="stop-color:var(--accent-d)" />
+              <stop offset="1" style="stop-color:var(--accent-c)" />
+            </linearGradient>
+          </defs>
+          <polyline points="0,24 15,18 30,21 45,10 60,14 75,6 90,9" fill="none" stroke="url(#lspark)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </div>
     </div>
   </div>
 </div>

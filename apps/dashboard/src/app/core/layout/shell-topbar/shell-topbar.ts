@@ -41,7 +41,7 @@ import { LayoutService } from '../layout.service';
         class="hidden items-center gap-2 sm:flex"
         style="height:38px;padding:0 14px;border-radius:11px;border:1px solid var(--chip-bd);background:var(--chip);color:var(--text-dim);font-size:12.5px;"
       >
-        <span style="width:7px;height:7px;border-radius:50%;background:var(--ok);animation:sq-pulsedot 2s infinite;"></span>
+        <span style="width:7px;height:7px;border-radius:50%;background:var(--accent-d);animation:sq-pulsedot-aqua 2s infinite;"></span>
         Jonli
       </div>
 

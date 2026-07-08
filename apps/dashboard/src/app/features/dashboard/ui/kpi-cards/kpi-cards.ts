@@ -56,7 +56,7 @@ import { CountUp } from '../../../../shared/count-up/count-up';
       </div>
       <div [style]="labelStyle()">Ochiq kassalar</div>
       <div style="margin-top:12px;height:7px;border-radius:99px;background:rgba(150,140,220,.14);overflow:hidden;">
-        <div [style.width.%]="busyPct()" style="height:100%;border-radius:99px;background:linear-gradient(90deg,var(--accent-a),var(--accent-b));box-shadow:0 0 12px rgba(var(--a-rgb),.6);transition:width .6s cubic-bezier(.2,.7,.3,1);"></div>
+        <div [style.width.%]="busyPct()" style="height:100%;border-radius:99px;background:linear-gradient(90deg,var(--accent-d),var(--accent-a));box-shadow:0 0 12px rgba(var(--d-rgb),.6);transition:width .6s cubic-bezier(.2,.7,.3,1);"></div>
       </div>
     </div>
 

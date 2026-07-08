@@ -3,26 +3,27 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 
-import { ButtonModule } from 'primeng/button';
-import { InputTextModule } from 'primeng/inputtext';
-import { PasswordModule } from 'primeng/password';
-import { MessageModule } from 'primeng/message';
-
+import { NeuralBackground } from '../../core/layout/neural-background/neural-background';
 import { AuthService } from '../../core/auth/auth.service';
 
 @Component({
   selector: 'app-login',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, ButtonModule, InputTextModule, PasswordModule, MessageModule],
-  host: { class: 'block h-screen' },
+  imports: [FormsModule, NeuralBackground],
+  host: {
+    class: 'relative block h-screen overflow-hidden',
+    style: 'background: var(--bg-radials), var(--bg); color: var(--text);',
+  },
   templateUrl: './login.html',
 })
 export class Login {
   private auth = inject(AuthService);
   private router = inject(Router);
 
-  username = signal('');
-  password = signal('');
+  // Demo qulayligi uchun oldindan to'ldirilgan (kirish ma'lumotlari ekranda ham ko'rsatilgan).
+  username = signal('admin');
+  password = signal('Admin!2026');
+  showPassword = signal(false);
   loading = signal(false);
   error = signal<string | null>(null);
 
@@ -43,7 +44,7 @@ export class Login {
         this.loading.set(false);
         this.error.set(
           err.status === 401
-            ? 'Login yoki parol noto\'g\'ri'
+            ? "Login yoki parol noto'g'ri"
             : 'Serverga ulanib bo\'lmadi. Gateway ishlayaptimi?',
         );
       },

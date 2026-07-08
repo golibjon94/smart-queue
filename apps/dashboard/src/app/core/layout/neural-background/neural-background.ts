@@ -75,8 +75,8 @@ export class NeuralBackground {
     const nodes: Node[] = [];
     const pulses: Pulse[] = [];
     const palette = light
-      ? [[15, 178, 150], [108, 99, 232], [236, 74, 120]]
-      : [[63, 224, 197], [142, 140, 255], [255, 122, 156]];
+      ? [[15, 178, 150], [108, 99, 232], [236, 74, 120], [20, 165, 200]]
+      : [[63, 224, 197], [142, 140, 255], [255, 122, 156], [90, 226, 255]];
     const linkC = light ? '70,60,150' : '120,130,220';
     const linkMax = light ? 0.13 : 0.22;
 
@@ -132,7 +132,7 @@ export class NeuralBackground {
       }
       for (let k = 0; k < N; k++) {
         const n = nodes[k];
-        const c = palette[k % 3];
+        const c = palette[k % palette.length];
         ctx.beginPath();
         ctx.fillStyle = `rgba(${c[0]},${c[1]},${c[2]},${light ? 0.7 : 0.9})`;
         ctx.shadowBlur = light ? 6 : 10;
@@ -145,7 +145,7 @@ export class NeuralBackground {
       if (Math.random() < 0.04 && pulses.length < 8) {
         const a = nodes[(Math.random() * N) | 0];
         const b = nodes[(Math.random() * N) | 0];
-        if (a !== b) pulses.push({ a, b, t: 0, c: palette[(Math.random() * 3) | 0] });
+        if (a !== b) pulses.push({ a, b, t: 0, c: palette[(Math.random() * palette.length) | 0] });
       }
       for (let i = pulses.length - 1; i >= 0; i--) {
         const p = pulses[i];

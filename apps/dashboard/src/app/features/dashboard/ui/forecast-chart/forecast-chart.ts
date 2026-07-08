@@ -47,7 +47,7 @@ const PAD_B = 26;
 
       <div class="my-1.5 flex gap-[18px]" style="font-size:11px;color:var(--text-dim);">
         <span class="flex items-center gap-1.5"><span style="width:14px;height:3px;border-radius:9px;background:var(--grad);"></span>Bashorat</span>
-        <span class="flex items-center gap-1.5"><span style="width:14px;height:10px;border-radius:3px;background:rgba(var(--b-rgb),.22);"></span>Ishonch oralig'i</span>
+        <span class="flex items-center gap-1.5"><span style="width:14px;height:10px;border-radius:3px;background:rgba(var(--d-rgb),.22);"></span>Ishonch oralig'i</span>
       </div>
 
       <div style="width:100%;height:250px;">
@@ -55,13 +55,14 @@ const PAD_B = 26;
           <svg [attr.viewBox]="viewBox" preserveAspectRatio="none" style="width:100%;height:100%;overflow:visible;">
             <defs>
               <linearGradient id="sqLine" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0" style="stop-color:var(--accent-a)" />
-                <stop offset=".55" style="stop-color:var(--accent-b)" />
+                <stop offset="0" style="stop-color:var(--accent-d)" />
+                <stop offset=".34" style="stop-color:var(--accent-a)" />
+                <stop offset=".68" style="stop-color:var(--accent-b)" />
                 <stop offset="1" style="stop-color:var(--accent-c)" />
               </linearGradient>
               <linearGradient id="sqArea" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0" style="stop-color:rgba(var(--b-rgb),.35)" />
-                <stop offset="1" style="stop-color:rgba(var(--b-rgb),0)" />
+                <stop offset="0" style="stop-color:rgba(var(--d-rgb),.32)" />
+                <stop offset="1" style="stop-color:rgba(var(--d-rgb),0)" />
               </linearGradient>
               <filter id="sqGlow" x="-20%" y="-40%" width="140%" height="180%">
                 <feGaussianBlur stdDeviation="4" result="b" />
@@ -71,7 +72,7 @@ const PAD_B = 26;
             @for (y of c.gridY; track y) {
               <line [attr.x1]="padL" [attr.y1]="y" [attr.x2]="w - padR" [attr.y2]="y" style="stroke:rgba(var(--b-rgb),.09)" stroke-width="1" />
             }
-            <path [attr.d]="c.band" style="fill:rgba(var(--b-rgb),.13)" />
+            <path [attr.d]="c.band" style="fill:rgba(var(--d-rgb),.13)" />
             <path [attr.d]="c.area" fill="url(#sqArea)" />
             <path
               [attr.d]="c.line"
