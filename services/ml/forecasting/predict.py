@@ -14,6 +14,7 @@ from pathlib import Path
 
 import joblib
 import numpy as np
+import pandas as pd
 
 from simulation import db
 
@@ -87,7 +88,10 @@ def write_forecasts(conn, rows: list[tuple], replace: bool, model_name: str) -> 
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--hours", type=int, default=72)
+    parser.add_argument("--hours", type=int, default=72, help="kelajakka bashorat soatlari")
+    parser.add_argument("--overlap-hours", type=int, default=0,
+                        help="oxirgi N soat aktualni ham qamrash uchun cutoff'ni orqaga suradi "
+                             "(anomaliya validatsiyasi: forecast aktual bilan kesishadi)")
     parser.add_argument("--replace", action="store_true")
     args = parser.parse_args()
 
@@ -95,14 +99,22 @@ def main() -> None:
     conn = db.connect()
     try:
         raw = load_hourly(conn)
-        branch_rows, service_rows = build_forecasts(payload, raw, args.hours)
+        horizon = args.hours
+        if args.overlap_hours > 0:
+            # Cutoff'ni oxirgi aktualdan `overlap_hours` orqaga surib, o'sha nuqtadan
+            # oldinga bashorat qilamiz — natijada forecast oxirgi N soat aktual bilan
+            # kesishadi (surge/backlog anomaliyasi uchun qoldiq hisoblanadi).
+            cutoff = raw["bucket"].max() - pd.Timedelta(hours=args.overlap_hours)
+            raw = raw[raw["bucket"] <= cutoff]
+            horizon = args.overlap_hours + args.hours
+        branch_rows, service_rows = build_forecasts(payload, raw, horizon)
         write_forecasts(conn, branch_rows + service_rows,
                         args.replace, payload["model_name"])
     finally:
         conn.close()
     print(f"forecasts jadvaliga yozildi: {len(branch_rows)} filial-qator, "
-          f"{len(service_rows)} xizmat-qator (gorizont {args.hours}h, "
-          f"model {payload['model_name']} v{payload['version']})")
+          f"{len(service_rows)} xizmat-qator (gorizont {horizon}h, "
+          f"overlap {args.overlap_hours}h, model {payload['model_name']} v{payload['version']})")
 
 
 if __name__ == "__main__":
