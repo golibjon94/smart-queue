@@ -1,50 +1,62 @@
 import { DOCUMENT } from '@angular/common';
 import { Injectable, computed, effect, inject, signal } from '@angular/core';
 
-export type ThemeMode = 'light' | 'dark';
+export type Theme = 'petrol' | 'slate' | 'navy' | 'plum' | 'light';
+
+export interface ThemePreset {
+  id: Theme;
+  label: string;
+  swatch: string; // preset --bg (swatch rangi)
+}
+
+export const THEME_PRESETS: readonly ThemePreset[] = [
+  { id: 'petrol', label: 'Petrol', swatch: '#0f1311' },
+  { id: 'slate', label: 'Slate', swatch: '#171c24' },
+  { id: 'navy', label: 'Navy', swatch: '#0a0f1c' },
+  { id: 'plum', label: 'Plum', swatch: '#0a0711' },
+  { id: 'light', label: 'Light', swatch: '#f2f1fb' },
+];
 
 const STORAGE_KEY = 'sq_theme';
-const DARK_CLASS = 'app-dark'; // PrimeNG darkModeSelector + tailwind @custom-variant
+const DARK_CLASS = 'app-dark'; // PrimeNG (toast/overlaylar) — light'dan tashqari hamma dark
+const VALID: readonly Theme[] = ['petrol', 'slate', 'navy', 'plum', 'light'];
 
 /**
- * Ilova mavzusi (light/dark). Holat signalda, localStorage'da saqlanadi,
- * birinchi yuklashda tizim sozlamasiga (prefers-color-scheme) qaraydi.
- * effect() <html> ga bitta manba sifatida `data-theme` atributini qo'yadi —
- * Aurora tokenlari (aurora-tokens.css) shunga qarab almashadi. PrimeNG uchun
- * `.app-dark` klassi ham parallel qo'yiladi (toast, login inputlari).
+ * Ilova mavzusi — 5 preset (petrol standart). Accent'lar hamma presetda bir xil,
+ * faqat sirt ranglari o'zgaradi (aurora-tokens.css). effect() `<html>` ga
+ * `data-theme` atributini qo'yadi; PrimeNG uchun light'dan tashqari `.app-dark`.
  */
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
   private readonly document = inject(DOCUMENT);
 
-  private readonly _mode = signal<ThemeMode>(this.resolveInitial());
-  readonly mode = this._mode.asReadonly();
-  readonly isDark = computed(() => this._mode() === 'dark');
+  private readonly _theme = signal<Theme>(this.resolveInitial());
+  readonly theme = this._theme.asReadonly();
+  readonly isDark = computed(() => this._theme() !== 'light');
+
+  readonly presets = THEME_PRESETS;
 
   constructor() {
     effect(() => {
-      const mode = this._mode();
+      const t = this._theme();
       const root = this.document.documentElement;
-      root.setAttribute('data-theme', mode);
-      root.classList.toggle(DARK_CLASS, mode === 'dark');
-      localStorage.setItem(STORAGE_KEY, mode);
+      root.setAttribute('data-theme', t);
+      root.classList.toggle(DARK_CLASS, t !== 'light');
+      localStorage.setItem(STORAGE_KEY, t);
     });
   }
 
-  toggle(): void {
-    this._mode.update((m) => (m === 'dark' ? 'light' : 'dark'));
+  set(theme: Theme): void {
+    this._theme.set(theme);
   }
 
-  set(mode: ThemeMode): void {
-    this._mode.set(mode);
-  }
-
-  private resolveInitial(): ThemeMode {
+  private resolveInitial(): Theme {
     const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved === 'light' || saved === 'dark') return saved;
-    const prefersDark = this.document.defaultView?.matchMedia?.(
-      '(prefers-color-scheme: dark)',
+    if (saved && (VALID as readonly string[]).includes(saved)) return saved as Theme;
+    if (saved === 'dark') return 'petrol'; // eski qiymatdan migratsiya
+    const prefersLight = this.document.defaultView?.matchMedia?.(
+      '(prefers-color-scheme: light)',
     ).matches;
-    return prefersDark ? 'dark' : 'light';
+    return prefersLight ? 'light' : 'petrol';
   }
 }

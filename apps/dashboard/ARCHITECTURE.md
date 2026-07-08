@@ -212,12 +212,12 @@ Autentifikatsiyadan o'tgan barcha sahifalar **`AppShell`** ichida:
 - Dashboard'ga xos chrome (filial nomi + connection tag + demo tugma) → `DashboardHeader`
   (feature ichida, shell'da emas).
 
-### Dark mode — `ThemeService`
+### Mavzu — `ThemeService` + `theme-switcher` (5 preset)
 
-- Holat `signal<'light'|'dark'>`, `localStorage` (`sq_theme`) da saqlanadi.
-- Birinchi yuklashda `prefers-color-scheme` ga qaraydi.
-- `effect()` `<html>` ga **`data-theme="light|dark"`** atributini (Aurora tokenlar uchun,
-  yagona manba) VA `.app-dark` klassini (PrimeNG toast/login uchun) parallel qo'yadi.
+- Holat `signal<Theme>` — **petrol** (standart) / slate / navy / plum / light. `localStorage` (`sq_theme`).
+- Accent'lar (aqua/mint/iris/coral) hamma presetda bir xil; faqat **sirt ranglari** o'zgaradi (`aurora-tokens.css` da `[data-theme="..."]` bloklari). Har preset `--brand-base` (login o'ng panel foni) ham beradi.
+- `effect()` `<html>` ga **`data-theme`** atributini (Aurora tokenlar, yagona manba) VA `.app-dark` klassini (light'dan tashqari — PrimeNG toast/overlaylar uchun) qo'yadi.
+- `core/theme/theme-switcher` — palette tugmasi + swatch popover; topbar va login sahifasida qayta ishlatiladi.
 
 ---
 

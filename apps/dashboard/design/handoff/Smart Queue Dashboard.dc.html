@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Sora:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:#0f1311;}
+  /* ===== Aurora design tokens ===== */
+  .sq-app{
+    --a-rgb:63,224,197;      /* mint-teal  */
+    --b-rgb:142,140,255;     /* iris       */
+    --c-rgb:255,122,156;     /* coral-pink */
+    --d-rgb:90,226,255;      /* aqua glow  */
+    --warn-rgb:255,179,92;   /* amber      */
+    --accent-a:rgb(var(--a-rgb));
+    --accent-b:rgb(var(--b-rgb));
+    --accent-c:rgb(var(--c-rgb));
+    --accent-d:rgb(var(--d-rgb));
+    --grad:linear-gradient(100deg,var(--accent-d),var(--accent-a) 34%,var(--accent-b) 68%,var(--accent-c));
+    --ok:rgb(var(--a-rgb));
+    --warn:rgb(var(--warn-rgb));
+    --danger:rgb(var(--c-rgb));
+    --bg:#0f1311;
+    --bg-radials:radial-gradient(1100px 640px at 82% -8%,rgba(var(--a-rgb),.10),transparent 58%),radial-gradient(900px 560px at -6% 6%,rgba(var(--warn-rgb),.07),transparent 55%),radial-gradient(760px 820px at 55% 120%,rgba(var(--b-rgb),.07),transparent 60%);
+    --vignette:rgba(11,14,12,.72);
+    --panel-1:rgba(28,34,32,.6);
+    --panel-2:rgba(17,21,20,.48);
+    --panel-alt-1:rgba(28,36,33,.62);
+    --panel-alt-2:rgba(16,21,19,.48);
+    --border:rgba(150,180,168,.12);
+    --border-strong:rgba(150,190,175,.3);
+    --border-accent:rgba(var(--c-rgb),.22);
+    --text:#e8ede9;
+    --text-dim:#9daba3;
+    --text-mut:#66716b;
+    --chip:rgba(255,255,255,.03);
+    --chip-bd:rgba(150,180,168,.12);
+    --shadow:0 22px 54px -26px rgba(0,0,0,.6);
+    --inset:inset 0 1px 0 rgba(255,255,255,.045);
+    --ok-ink:#03241d;
+    --canvas-op:.6;
+  }
+  .sq-app[data-theme="light"]{
+    --a-rgb:15,178,150;
+    --b-rgb:108,99,232;
+    --c-rgb:236,74,120;
+    --d-rgb:20,165,200;
+    --warn-rgb:214,132,36;
+    --bg:#f2f1fb;
+    --bg-radials:radial-gradient(1150px 680px at 82% -10%,rgba(var(--c-rgb),.14),transparent 58%),radial-gradient(950px 600px at -6% 8%,rgba(var(--a-rgb),.13),transparent 55%),radial-gradient(800px 900px at 55% 120%,rgba(var(--b-rgb),.10),transparent 60%);
+    --vignette:rgba(242,241,251,.55);
+    --panel-1:rgba(255,255,255,.92);
+    --panel-2:rgba(255,255,255,.7);
+    --panel-alt-1:rgba(255,255,255,.94);
+    --panel-alt-2:rgba(252,250,255,.78);
+    --border:rgba(70,58,130,.13);
+    --border-strong:rgba(70,58,130,.32);
+    --border-accent:rgba(var(--c-rgb),.3);
+    --text:#1a1730;
+    --text-dim:#5a5578;
+    --text-mut:#8a85a6;
+    --chip:rgba(70,58,130,.04);
+    --chip-bd:rgba(70,58,130,.12);
+    --shadow:0 18px 44px -24px rgba(70,55,130,.28);
+    --inset:inset 0 1px 0 rgba(255,255,255,.9);
+    --ok-ink:#ffffff;
+    --canvas-op:.55;
+  }
+  .sq-app[data-theme="slate"]{
+    --bg:#171c24;
+    --bg-radials:radial-gradient(1100px 640px at 82% -8%,rgba(var(--a-rgb),.10),transparent 58%),radial-gradient(900px 560px at -6% 6%,rgba(var(--b-rgb),.08),transparent 55%),radial-gradient(760px 820px at 55% 120%,rgba(var(--warn-rgb),.06),transparent 60%);
+    --vignette:rgba(18,22,30,.55);
+    --panel-1:rgba(38,44,54,.66);
+    --panel-2:rgba(28,33,42,.55);
+    --panel-alt-1:rgba(40,46,58,.66);
+    --panel-alt-2:rgba(28,33,44,.55);
+    --border:rgba(160,175,205,.14);
+    --border-strong:rgba(160,178,210,.34);
+    --border-accent:rgba(var(--c-rgb),.24);
+    --chip:rgba(255,255,255,.04);
+    --chip-bd:rgba(160,175,205,.14);
+    --text:#eef1f7;
+    --text-dim:#a7b0c4;
+    --text-mut:#727c93;
+    --canvas-op:.5;
+  }
+  .sq-app[data-theme="navy"]{
+    --bg:#0a0f1c;
+    --bg-radials:radial-gradient(1100px 640px at 82% -8%,rgba(var(--d-rgb),.12),transparent 58%),radial-gradient(900px 560px at -6% 6%,rgba(var(--b-rgb),.10),transparent 55%),radial-gradient(760px 820px at 55% 120%,rgba(var(--a-rgb),.07),transparent 60%);
+    --vignette:rgba(8,12,24,.72);
+    --panel-1:rgba(22,30,50,.62);
+    --panel-2:rgba(14,20,36,.5);
+    --panel-alt-1:rgba(24,32,54,.64);
+    --panel-alt-2:rgba(14,20,38,.5);
+    --border:rgba(130,150,210,.15);
+    --border-strong:rgba(130,155,215,.34);
+    --border-accent:rgba(var(--c-rgb),.24);
+    --chip:rgba(255,255,255,.035);
+    --chip-bd:rgba(130,150,210,.14);
+    --text:#e9edf7;
+    --text-dim:#9aa6c6;
+    --text-mut:#657090;
+    --canvas-op:.7;
+  }
+  .sq-app[data-theme="plum"]{
+    --bg:#0a0711;
+    --bg-radials:radial-gradient(1150px 680px at 82% -10%,rgba(var(--c-rgb),.20),transparent 58%),radial-gradient(950px 600px at -6% 8%,rgba(var(--a-rgb),.16),transparent 55%),radial-gradient(800px 900px at 55% 120%,rgba(var(--b-rgb),.14),transparent 60%);
+    --vignette:rgba(10,7,17,.78);
+    --panel-1:rgba(26,21,42,.62);
+    --panel-2:rgba(14,11,24,.5);
+    --panel-alt-1:rgba(30,20,44,.64);
+    --panel-alt-2:rgba(14,11,26,.5);
+    --border:rgba(150,140,220,.14);
+    --border-strong:rgba(150,140,220,.36);
+    --border-accent:rgba(var(--c-rgb),.24);
+    --chip:rgba(255,255,255,.03);
+    --chip-bd:rgba(150,140,220,.13);
+    --text:#ecebf7;
+    --text-dim:#a49ec4;
+    --text-mut:#6a648f;
+    --canvas-op:.8;
+  }
+  @keyframes sq-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+  @keyframes sq-spin{to{transform:rotate(360deg)}}
+  @keyframes sq-spin-rev{to{transform:rotate(-360deg)}}
+  @keyframes sq-pulse{0%,100%{opacity:.55;transform:scale(1)}50%{opacity:1;transform:scale(1.12)}}
+  @keyframes sq-pulsedot{0%{box-shadow:0 0 0 0 rgba(var(--a-rgb),.6)}70%{box-shadow:0 0 0 8px rgba(var(--a-rgb),0)}100%{box-shadow:0 0 0 0 rgba(var(--a-rgb),0)}}
+  @keyframes sq-rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes sq-dash{to{stroke-dashoffset:0}}
+  .sq-rise{opacity:0;animation:sq-rise .7s cubic-bezier(.2,.7,.3,1) forwards;}
+  .sq-scroll{scrollbar-width:thin;scrollbar-color:rgba(var(--b-rgb),.5) transparent;}
+  .sq-scroll::-webkit-scrollbar{width:7px;}
+  .sq-scroll::-webkit-scrollbar-track{background:transparent;margin:6px 0;}
+  .sq-scroll::-webkit-scrollbar-thumb{background:linear-gradient(180deg,var(--accent-d),var(--accent-b));border-radius:99px;}
+  .sq-card{transition:transform .5s cubic-bezier(.2,.7,.3,1),box-shadow .5s,border-color .5s;}
+  .sq-card:hover{transform:translateY(-4px);border-color:var(--border-strong)!important;box-shadow:0 22px 54px -22px rgba(var(--d-rgb),.42),var(--inset)!important;}
+  .sq-navitem{transition:background .3s,color .3s;}
+  .sq-navitem:hover{background:rgba(var(--b-rgb),.10)!important;color:var(--text)!important;}
+  .sq-btn{transition:transform .25s,box-shadow .3s,filter .3s;}
+  .sq-btn:hover{transform:translateY(-2px);filter:brightness(1.07);box-shadow:0 14px 34px -12px rgba(var(--b-rgb),.75)!important;}
+  .sq-btn:active{transform:translateY(0) scale(.98);}
+  .sq-mini{transition:transform .3s,background .3s,color .3s,border-color .3s;}
+  .sq-mini:hover{background:rgba(var(--b-rgb),.12)!important;color:var(--text)!important;transform:translateY(-1px);}
+  .sq-rec{transition:transform .4s cubic-bezier(.2,.7,.3,1),border-color .4s,background .4s;}
+  .sq-rec:hover{transform:translateX(3px);border-color:var(--border-strong)!important;}
+</style>
+</helmet>
+
+<div id="sq-app" class="sq-app" style="position:relative;min-height:100vh;width:100%;background:var(--bg-radials),var(--bg);font-family:'Sora',system-ui,sans-serif;color:var(--text);overflow:hidden;">
+
+  <canvas id="sq-bg" style="position:fixed;inset:0;width:100%;height:100%;z-index:0;opacity:var(--canvas-op);pointer-events:none;"></canvas>
+  <div style="position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(circle at 50% 50%,transparent 52%,var(--vignette) 100%);"></div>
+
+  <div style="position:relative;z-index:2;display:flex;min-height:100vh;">
+
+    <!-- SIDEBAR -->
+    <aside style="position:sticky;top:0;height:100vh;width:250px;flex-shrink:0;display:flex;flex-direction:column;padding:22px 16px;gap:8px;border-right:1px solid var(--border);background:var(--panel-1);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);">
+      <div style="display:flex;align-items:center;gap:12px;padding:6px 8px 20px;">
+        <div style="position:relative;height:42px;width:42px;flex-shrink:0;border-radius:13px;background:conic-gradient(from 140deg,var(--accent-d),var(--accent-a),var(--accent-b),var(--accent-c),var(--accent-d));display:grid;place-items:center;box-shadow:0 8px 26px -8px rgba(var(--b-rgb),.8);">
+          <div style="position:absolute;inset:2px;border-radius:11px;background:var(--bg);"></div>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="position:relative;"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8Z" fill="url(#g1)"/><defs><linearGradient id="g1" x1="0" y1="0" x2="24" y2="24"><stop style="stop-color:var(--accent-d)"/><stop offset="1" style="stop-color:var(--accent-c)"/></linearGradient></defs></svg>
+        </div>
+        <div style="display:flex;flex-direction:column;line-height:1.1;">
+          <span style="font-family:'Space Grotesk';font-weight:700;font-size:16px;letter-spacing:.3px;color:var(--text);">smart-queue</span>
+          <span style="font-size:10.5px;color:var(--text-mut);letter-spacing:1.5px;text-transform:uppercase;">AI Orchestrator</span>
+        </div>
+      </div>
+
+      <span style="font-size:10px;letter-spacing:1.8px;color:var(--text-mut);text-transform:uppercase;padding:0 10px 4px;">Boshqaruv</span>
+      <a class="sq-navitem" style="display:flex;align-items:center;gap:13px;padding:11px 12px;border-radius:12px;text-decoration:none;color:var(--text);font-size:13.5px;font-weight:500;background:linear-gradient(90deg,rgba(var(--a-rgb),.16),rgba(var(--b-rgb),.10));box-shadow:inset 0 0 0 1px rgba(var(--b-rgb),.28);position:relative;">
+        <span style="position:absolute;left:0;top:9px;bottom:9px;width:3px;border-radius:9px;background:linear-gradient(var(--accent-d),var(--accent-b));"></span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-d)" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        Boshqaruv paneli
+      </a>
+      <a class="sq-navitem" style="display:flex;align-items:center;gap:13px;padding:11px 12px;border-radius:12px;text-decoration:none;color:var(--text-dim);font-size:13.5px;font-weight:500;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3v18h18"/><path d="M7 14l3-4 3 3 4-6"/></svg>
+        <span style="flex:1;">Analitika</span>
+        <span style="font-size:9.5px;padding:2px 7px;border-radius:99px;background:rgba(var(--b-rgb),.14);color:var(--text-dim);">tez orada</span>
+      </a>
+      <a class="sq-navitem" style="display:flex;align-items:center;gap:13px;padding:11px 12px;border-radius:12px;text-decoration:none;color:var(--text-dim);font-size:13.5px;font-weight:500;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+        <span style="flex:1;">Sozlamalar</span>
+        <span style="font-size:9.5px;padding:2px 7px;border-radius:99px;background:rgba(var(--b-rgb),.14);color:var(--text-dim);">tez orada</span>
+      </a>
+
+      <div style="margin-top:auto;"></div>
+
+      <div style="position:relative;border-radius:16px;padding:16px 14px;background:linear-gradient(160deg,rgba(var(--a-rgb),.12),rgba(var(--c-rgb),.10));border:1px solid rgba(var(--b-rgb),.2);overflow:hidden;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="position:relative;width:38px;height:38px;flex-shrink:0;">
+            <div style="position:absolute;inset:0;border-radius:50%;border:1.5px solid transparent;border-top-color:var(--accent-d);border-right-color:var(--accent-a);animation:sq-spin 3s linear infinite;"></div>
+            <div style="position:absolute;inset:5px;border-radius:50%;border:1.5px solid transparent;border-bottom-color:var(--accent-c);border-left-color:var(--accent-b);animation:sq-spin-rev 2.4s linear infinite;"></div>
+            <div style="position:absolute;inset:12px;border-radius:50%;background:radial-gradient(circle,#fff,var(--accent-d));box-shadow:0 0 14px var(--accent-d);animation:sq-pulse 2s ease-in-out infinite;"></div>
+          </div>
+          <div style="line-height:1.3;">
+            <div style="font-size:12.5px;font-weight:600;color:var(--text);">AI Engine</div>
+            <div style="font-size:10.5px;color:var(--text-dim);font-family:'JetBrains Mono';">LightGBM v3.2 · live</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <div style="flex:1;min-width:0;display:flex;flex-direction:column;">
+
+      <!-- TOPBAR -->
+      <header style="position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:14px;height:66px;padding:0 26px;border-bottom:1px solid var(--border);background:var(--panel-2);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);">
+        <div style="display:flex;align-items:center;gap:10px;padding:6px 13px;border-radius:99px;background:var(--chip);border:1px solid var(--chip-bd);font-size:12.5px;color:var(--text-dim);min-width:210px;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--text-mut)" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          Qidirish yoki AI'dan so'rash…
+        </div>
+        <div style="flex:1;"></div>
+        <button class="sq-mini" style="display:flex;align-items:center;gap:8px;height:38px;padding:0 14px;border-radius:11px;border:1px solid var(--chip-bd);background:var(--chip);color:var(--text-dim);cursor:pointer;font-family:'Sora';font-size:12.5px;">
+          <span style="width:7px;height:7px;border-radius:50%;background:var(--accent-d);box-shadow:0 0 9px rgba(var(--d-rgb),.9);animation:sq-pulsedot 2s infinite;"></span>
+          Jonli
+        </button>
+        <button class="sq-mini" title="Bildirishnomalar" style="position:relative;display:grid;place-items:center;width:38px;height:38px;border-radius:11px;border:1px solid var(--chip-bd);background:var(--chip);color:var(--text-dim);cursor:pointer;">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+          <span style="position:absolute;top:8px;right:9px;width:7px;height:7px;border-radius:50%;background:var(--danger);box-shadow:0 0 0 2px var(--bg);"></span>
+        </button>
+        <button id="sq-theme" class="sq-mini" title="Rejimni almashtirish" style="display:grid;place-items:center;width:38px;height:38px;border-radius:11px;border:1px solid var(--chip-bd);background:var(--chip);color:var(--text-dim);cursor:pointer;"></button>
+        <button class="sq-mini" style="display:flex;align-items:center;gap:9px;height:38px;padding:3px 12px 3px 4px;border-radius:99px;border:1px solid var(--chip-bd);background:var(--chip);color:var(--text);cursor:pointer;font-family:'Sora';">
+          <span style="width:30px;height:30px;border-radius:50%;background:conic-gradient(from 210deg,var(--accent-a),var(--accent-b),var(--accent-c));display:grid;place-items:center;font-size:12.5px;font-weight:700;color:#0a0d1a;">A</span>
+          <span style="font-size:12.5px;font-weight:500;">Aziza R.</span>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-mut)" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+      </header>
+
+      <!-- CONTENT -->
+      <main class="sq-scroll" style="flex:1;overflow-y:auto;padding:26px 26px 34px;max-width:1520px;width:100%;margin:0 auto;">
+
+        <div class="sq-rise" style="animation-delay:.02s;display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:24px;">
+          <div>
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:7px;">
+              <span style="font-size:11px;letter-spacing:1.6px;text-transform:uppercase;color:var(--accent-b);font-family:'JetBrains Mono';">Real-time · Asia/Tashkent</span>
+            </div>
+            <h1 style="margin:0;font-family:'Space Grotesk';font-weight:700;font-size:30px;letter-spacing:-.5px;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;">Toshkent — Markaziy filial</h1>
+            <p style="margin:6px 0 0;font-size:13.5px;color:var(--text-dim);">Navbatlar, prognoz va AI tavsiyalari — bir joyda, jonli.</p>
+          </div>
+          <button class="sq-btn" style="display:flex;align-items:center;gap:10px;height:46px;padding:0 22px;border:none;border-radius:14px;cursor:pointer;font-family:'Space Grotesk';font-weight:600;font-size:14px;color:var(--ok-ink);background:var(--grad);box-shadow:0 10px 30px -12px rgba(var(--b-rgb),.8);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m5 3 14 9-14 9V3Z"/></svg>
+            Demo: tushlik cho'qqisi
+          </button>
+        </div>
+
+        <!-- KPI ROW -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:18px;">
+
+          <div class="sq-card sq-rise" style="animation-delay:.06s;position:relative;overflow:hidden;border-radius:18px;padding:18px;background:linear-gradient(160deg,var(--panel-1),var(--panel-2));border:1px solid var(--border);box-shadow:var(--inset);">
+            <div style="position:absolute;top:-30px;right:-30px;width:110px;height:110px;border-radius:50%;background:radial-gradient(circle,rgba(var(--b-rgb),.28),transparent 70%);"></div>
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+              <div style="width:44px;height:44px;border-radius:13px;display:grid;place-items:center;background:linear-gradient(150deg,rgba(var(--b-rgb),.22),rgba(var(--b-rgb),.05));border:1px solid rgba(var(--b-rgb),.3);">
+                <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="var(--accent-b)" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              </div>
+              <span style="display:flex;align-items:center;gap:4px;font-size:11.5px;font-weight:600;color:var(--danger);font-family:'JetBrains Mono';">▲ 12%</span>
+            </div>
+            <div style="margin-top:14px;font-family:'Space Grotesk';font-weight:700;font-size:34px;line-height:1;color:var(--text);" data-count="47">47</div>
+            <div style="margin-top:6px;font-size:12.5px;color:var(--text-dim);">Navbatda kutmoqda</div>
+            <svg viewBox="0 0 120 28" preserveAspectRatio="none" style="margin-top:10px;width:100%;height:24px;"><polyline points="0,22 15,18 30,20 45,12 60,15 75,8 90,11 105,5 120,7" fill="none" stroke="var(--accent-b)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+
+          <div class="sq-card sq-rise" style="animation-delay:.11s;position:relative;overflow:hidden;border-radius:18px;padding:18px;background:linear-gradient(160deg,var(--panel-1),var(--panel-2));border:1px solid var(--border);box-shadow:var(--inset);">
+            <div style="position:absolute;top:-30px;right:-30px;width:110px;height:110px;border-radius:50%;background:radial-gradient(circle,rgba(var(--warn-rgb),.24),transparent 70%);"></div>
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+              <div style="width:44px;height:44px;border-radius:13px;display:grid;place-items:center;background:linear-gradient(150deg,rgba(var(--warn-rgb),.22),rgba(var(--warn-rgb),.05));border:1px solid rgba(var(--warn-rgb),.3);">
+                <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="var(--warn)" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+              </div>
+              <span style="display:flex;align-items:center;gap:4px;font-size:11.5px;font-weight:600;color:var(--ok);font-family:'JetBrains Mono';">▼ 3%</span>
+            </div>
+            <div style="margin-top:14px;font-family:'Space Grotesk';font-weight:700;font-size:34px;line-height:1;color:var(--text);"><span data-count="6" data-prefix="~">~6</span><span style="font-size:15px;color:var(--text-dim);font-weight:500;"> daq</span></div>
+            <div style="margin-top:6px;font-size:12.5px;color:var(--text-dim);">O'rtacha kutish</div>
+            <svg viewBox="0 0 120 28" preserveAspectRatio="none" style="margin-top:10px;width:100%;height:24px;"><polyline points="0,10 15,14 30,9 45,16 60,13 75,18 90,15 105,20 120,17" fill="none" stroke="var(--warn)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+
+          <div class="sq-card sq-rise" style="animation-delay:.16s;position:relative;overflow:hidden;border-radius:18px;padding:18px;background:linear-gradient(160deg,var(--panel-1),var(--panel-2));border:1px solid var(--border);box-shadow:var(--inset);">
+            <div style="position:absolute;top:-30px;right:-30px;width:110px;height:110px;border-radius:50%;background:radial-gradient(circle,rgba(var(--a-rgb),.24),transparent 70%);"></div>
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+              <div style="width:44px;height:44px;border-radius:13px;display:grid;place-items:center;background:linear-gradient(150deg,rgba(var(--a-rgb),.22),rgba(var(--a-rgb),.05));border:1px solid rgba(var(--a-rgb),.3);">
+                <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="var(--accent-a)" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+              </div>
+              <span style="font-size:11.5px;font-weight:600;color:var(--ok);font-family:'JetBrains Mono';">67% band</span>
+            </div>
+            <div style="margin-top:14px;font-family:'Space Grotesk';font-weight:700;font-size:34px;line-height:1;color:var(--text);"><span data-count="8">8</span><span style="font-size:17px;color:var(--text-dim);font-weight:500;">/12</span></div>
+            <div style="margin-top:6px;font-size:12.5px;color:var(--text-dim);">Ochiq kassalar</div>
+            <div style="margin-top:12px;height:7px;border-radius:99px;background:rgba(150,140,220,.14);overflow:hidden;"><div style="height:100%;width:67%;border-radius:99px;background:linear-gradient(90deg,var(--accent-d),var(--accent-a));box-shadow:0 0 12px rgba(var(--d-rgb),.6);"></div></div>
+          </div>
+
+          <div class="sq-card sq-rise" style="animation-delay:.21s;position:relative;overflow:hidden;border-radius:18px;padding:18px;background:linear-gradient(160deg,var(--panel-alt-1),var(--panel-alt-2));border:1px solid var(--border-accent);box-shadow:var(--inset);">
+            <div style="position:absolute;top:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(var(--c-rgb),.32),transparent 70%);"></div>
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+              <div style="width:44px;height:44px;border-radius:13px;display:grid;place-items:center;background:linear-gradient(150deg,rgba(var(--c-rgb),.28),rgba(var(--b-rgb),.08));border:1px solid rgba(var(--c-rgb),.4);">
+                <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="var(--accent-c)" stroke-width="1.8"><path d="M12 3v2M5.6 5.6l1.4 1.4M3 12h2M19 12h2M17 7l1.4-1.4M12 8a4 4 0 0 0-2 7.5V17a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-1.5A4 4 0 0 0 12 8Z"/><path d="M10 21h4"/></svg>
+              </div>
+              <span style="display:flex;align-items:center;gap:5px;font-size:10.5px;font-weight:600;color:var(--accent-c);font-family:'JetBrains Mono';padding:3px 8px;border-radius:99px;background:rgba(var(--c-rgb),.14);"><span style="width:5px;height:5px;border-radius:50%;background:var(--accent-c);animation:sq-pulse 1.6s infinite;"></span>AI</span>
+            </div>
+            <div style="margin-top:14px;font-family:'Space Grotesk';font-weight:700;font-size:34px;line-height:1;color:var(--text);" data-count="3">3</div>
+            <div style="margin-top:6px;font-size:12.5px;color:var(--text-dim);">Faol AI tavsiyalari</div>
+            <div style="margin-top:11px;font-size:11px;color:var(--text-mut);font-family:'JetBrains Mono';">so'nggi: 2 daq oldin</div>
+          </div>
+        </div>
+
+        <!-- MAIN GRID -->
+        <div style="display:grid;grid-template-columns:5fr 7fr;gap:18px;align-items:start;">
+
+          <div style="display:flex;flex-direction:column;gap:18px;min-width:0;">
+
+            <section class="sq-card sq-rise" style="animation-delay:.26s;border-radius:20px;padding:20px;background:linear-gradient(160deg,var(--panel-1),var(--panel-2));border:1px solid var(--border);box-shadow:var(--inset);">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+                <h2 style="margin:0;font-family:'Space Grotesk';font-weight:600;font-size:15px;color:var(--text);">Kassalar holati</h2>
+                <span style="font-size:11px;color:var(--accent-b);font-family:'JetBrains Mono';">12 ta kassa</span>
+              </div>
+              <div id="sq-counters" style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px;"></div>
+            </section>
+
+            <section class="sq-card sq-rise" style="animation-delay:.31s;border-radius:20px;padding:20px;background:linear-gradient(160deg,var(--panel-1),var(--panel-2));border:1px solid var(--border);box-shadow:var(--inset);">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+                <h2 style="margin:0;font-family:'Space Grotesk';font-weight:600;font-size:15px;color:var(--text);">Navbatlar</h2>
+                <span style="font-size:11px;color:var(--text-mut);">xizmat turlari bo'yicha</span>
+              </div>
+              <div style="display:grid;grid-template-columns:1.6fr .8fr .9fr 1fr;gap:8px;padding:0 4px 10px;font-size:10.5px;letter-spacing:.6px;text-transform:uppercase;color:var(--text-mut);border-bottom:1px solid var(--border);">
+                <span>Xizmat turi</span><span style="text-align:center;">Kutmoqda</span><span style="text-align:center;">Kassalar</span><span style="text-align:right;">Kutish</span>
+              </div>
+              <div id="sq-queues"></div>
+            </section>
+
+            <section class="sq-card sq-rise" style="animation-delay:.36s;border-radius:20px;padding:20px;background:linear-gradient(160deg,var(--panel-1),var(--panel-2));border:1px solid var(--border);box-shadow:var(--inset);">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+                <h2 style="margin:0;font-family:'Space Grotesk';font-weight:600;font-size:15px;color:var(--text);">Anomaliyalar</h2>
+                <span style="font-size:10.5px;font-weight:600;padding:3px 9px;border-radius:99px;background:rgba(var(--c-rgb),.14);color:var(--danger);">2 faol</span>
+              </div>
+              <div id="sq-anomalies" style="display:flex;flex-direction:column;gap:10px;"></div>
+            </section>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:18px;min-width:0;">
+
+            <section class="sq-card sq-rise" style="animation-delay:.28s;position:relative;overflow:hidden;border-radius:20px;padding:20px;background:linear-gradient(160deg,var(--panel-1),var(--panel-2));border:1px solid var(--border);box-shadow:var(--inset);">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:6px;">
+                <div>
+                  <h2 style="margin:0;font-family:'Space Grotesk';font-weight:600;font-size:15px;color:var(--text);">Kelish oqimi bashorati</h2>
+                  <p style="margin:4px 0 0;font-size:12px;color:var(--text-dim);">Keyingi 24 soat · mijoz/soat</p>
+                </div>
+                <span style="display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--accent-c);font-family:'JetBrains Mono';padding:5px 11px;border-radius:99px;background:rgba(var(--c-rgb),.12);border:1px solid rgba(var(--c-rgb),.25);">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6v6H9z"/><path d="M9 2v2M15 2v2M9 20v2M15 20v2M2 9h2M2 15h2M20 9h2M20 15h2"/></svg>
+                  LightGBM v3.2
+                </span>
+              </div>
+              <div style="display:flex;gap:18px;margin:6px 0 4px;font-size:11px;color:var(--text-dim);">
+                <span style="display:flex;align-items:center;gap:6px;"><span style="width:14px;height:3px;border-radius:9px;background:var(--grad);"></span>Bashorat</span>
+                <span style="display:flex;align-items:center;gap:6px;"><span style="width:14px;height:10px;border-radius:3px;background:rgba(var(--b-rgb),.22);"></span>Ishonch oralig'i</span>
+              </div>
+              <div id="sq-forecast" style="width:100%;height:250px;"></div>
+            </section>
+
+            <section class="sq-card sq-rise" style="animation-delay:.33s;display:flex;flex-direction:column;border-radius:20px;background:linear-gradient(160deg,var(--panel-alt-1),var(--panel-alt-2));border:1px solid var(--border-accent);box-shadow:var(--inset);overflow:hidden;">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:20px 20px 14px;border-bottom:1px solid var(--border);">
+                <div style="display:flex;align-items:center;gap:11px;">
+                  <div style="position:relative;width:30px;height:30px;">
+                    <div style="position:absolute;inset:0;border-radius:9px;border:1.5px solid transparent;border-top-color:var(--accent-c);border-right-color:var(--accent-b);animation:sq-spin 3s linear infinite;"></div>
+                    <div style="position:absolute;inset:7px;border-radius:50%;background:radial-gradient(circle,#fff,var(--accent-c));box-shadow:0 0 10px var(--accent-c);"></div>
+                  </div>
+                  <div>
+                    <h2 style="margin:0;font-family:'Space Grotesk';font-weight:600;font-size:15px;color:var(--text);">AI Tavsiyalar</h2>
+                    <p style="margin:3px 0 0;font-size:11px;color:var(--text-dim);">real-vaqtda generatsiya qilinmoqda</p>
+                  </div>
+                </div>
+                <span style="font-size:10.5px;font-weight:600;padding:4px 10px;border-radius:99px;background:rgba(var(--c-rgb),.16);color:var(--accent-c);">3 faol</span>
+              </div>
+              <div id="sq-recs" class="sq-scroll" style="max-height:360px;overflow-y:auto;padding:14px 18px 18px;display:flex;flex-direction:column;gap:11px;"></div>
+            </section>
+          </div>
+        </div>
+
+        <div style="text-align:center;margin-top:28px;font-size:11px;color:var(--text-mut);font-family:'JetBrains Mono';">smart-queue · AI orchestration layer · yangilangan 08.07.2026</div>
+      </main>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  componentDidMount() {
+    this.themes = [
+      { name: 'petrol', label: 'Petrol', bg: '#0f1311', light: false, sw: 'linear-gradient(135deg,#0f1311,#1b2420)' },
+      { name: 'slate', label: "Slate \u2014 yorug\u2019roq", bg: '#171c24', light: false, sw: 'linear-gradient(135deg,#171c24,#2b333f)' },
+      { name: 'navy', label: 'Navy', bg: '#0a0f1c', light: false, sw: 'linear-gradient(135deg,#0a0f1c,#16223c)' },
+      { name: 'plum', label: 'Plum', bg: '#0a0711', light: false, sw: 'linear-gradient(135deg,#0a0711,#241633)' },
+      { name: 'light', label: "Yorug\u2019 (Light)", bg: '#f2f1fb', light: true, sw: 'linear-gradient(135deg,#f6f5fc,#dfe0f5)' },
+    ];
+    this.currentTheme = 'petrol';
+    this.updateThemeIcon();
+    this.buildThemeMenu();
+    const btn = document.getElementById('sq-theme');
+    if (btn) btn.addEventListener('click', (e) => { e.stopPropagation(); this.toggleMenu(); });
+    this.initBackground();
+    this.renderCounters();
+    this.renderQueues();
+    this.renderAnomalies();
+    this.renderRecs();
+    this.drawForecast();
+    requestAnimationFrame(() => this.animateCounts());
+  }
+
+  componentWillUnmount() { cancelAnimationFrame(this._raf); window.removeEventListener('resize', this._onResize); }
+
+  setTheme(name) {
+    const t = this.themes.find((x) => x.name === name);
+    if (!t) return;
+    this.currentTheme = name;
+    const app = document.getElementById('sq-app');
+    if (app) { if (name === 'petrol') app.removeAttribute('data-theme'); else app.setAttribute('data-theme', name); }
+    document.body.style.background = t.bg;
+    this.updateThemeIcon();
+    this.highlightActive();
+    this.restartCanvas();
+  }
+
+  updateThemeIcon() {
+    const btn = document.getElementById('sq-theme');
+    if (!btn) return;
+    btn.innerHTML = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="13.5" cy="6.5" r="1.3"/><circle cx="17.5" cy="10.5" r="1.3"/><circle cx="8.5" cy="7.5" r="1.3"/><circle cx="6.5" cy="12.5" r="1.3"/><path d="M12 2a10 10 0 1 0 0 20c1.1 0 2-.9 2-2 0-.5-.2-.9-.5-1.3-.3-.4-.5-.8-.5-1.2 0-1 .8-1.8 1.8-1.8H16a6 6 0 0 0 6-6c0-4.4-4.5-8-10-8Z"/></svg>';
+  }
+
+  buildThemeMenu() {
+    const app = document.getElementById('sq-app');
+    if (!app) return;
+    const menu = document.createElement('div');
+    menu.id = 'sq-theme-menu';
+    menu.style.cssText = 'position:fixed;top:60px;right:118px;z-index:60;display:none;flex-direction:column;gap:3px;padding:8px;border-radius:15px;background:var(--panel-1);border:1px solid var(--border-strong);box-shadow:0 24px 60px -22px rgba(0,0,0,.75);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);min-width:196px;';
+    const head = document.createElement('div');
+    head.textContent = 'Ko\u2019rinish (theme)';
+    head.style.cssText = "font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:var(--text-mut);font-family:'JetBrains Mono';padding:4px 8px 6px;";
+    menu.appendChild(head);
+    this.themes.forEach((t) => {
+      const b = document.createElement('button');
+      b.dataset.theme = t.name;
+      b.style.cssText = "display:flex;align-items:center;gap:11px;padding:8px 9px;border:none;border-radius:11px;background:transparent;color:var(--text);cursor:pointer;font-family:'Sora';font-size:13px;text-align:left;transition:background .2s;";
+      b.onmouseenter = () => { if (this.currentTheme !== t.name) b.style.background = 'rgba(var(--b-rgb),.12)'; };
+      b.onmouseleave = () => { if (this.currentTheme !== t.name) b.style.background = 'transparent'; };
+      b.innerHTML = `<span style="width:28px;height:28px;border-radius:9px;flex-shrink:0;background:${t.sw};border:1px solid rgba(150,170,200,.25);box-shadow:inset 0 0 10px rgba(0,0,0,.35);"></span><span style="flex:1;">${t.label}</span><span class="sq-chk" style="opacity:0;color:var(--accent-d);font-weight:700;">\u2713</span>`;
+      b.addEventListener('click', () => { this.setTheme(t.name); this.closeMenu(); });
+      menu.appendChild(b);
+    });
+    app.appendChild(menu);
+    this._menu = menu;
+    document.addEventListener('click', (e) => {
+      const btn = document.getElementById('sq-theme');
+      if (this._menuOpen && !menu.contains(e.target) && btn && !btn.contains(e.target)) this.closeMenu();
+    });
+    this.highlightActive();
+  }
+
+  toggleMenu() { this._menuOpen = !this._menuOpen; if (this._menu) this._menu.style.display = this._menuOpen ? 'flex' : 'none'; }
+  closeMenu() { this._menuOpen = false; if (this._menu) this._menu.style.display = 'none'; }
+
+  highlightActive() {
+    if (!this._menu) return;
+    this._menu.querySelectorAll('button').forEach((b) => {
+      const on = b.dataset.theme === this.currentTheme;
+      b.style.background = on ? 'rgba(var(--b-rgb),.14)' : 'transparent';
+      const c = b.querySelector('.sq-chk');
+      if (c) c.style.opacity = on ? '1' : '0';
+    });
+  }
+
+  animateCounts() {
+    document.querySelectorAll('[data-count]').forEach((el) => {
+      const target = parseFloat(el.dataset.count);
+      const prefix = el.dataset.prefix || '';
+      const dur = 1300, start = performance.now();
+      const step = (now) => {
+        const t = Math.min(1, (now - start) / dur);
+        const e = 1 - Math.pow(1 - t, 3);
+        const val = target * e;
+        el.textContent = prefix + (Number.isInteger(target) ? Math.round(val) : val.toFixed(1));
+        if (t < 1) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    });
+  }
+
+  restartCanvas() { cancelAnimationFrame(this._raf); this.initBackground(); }
+
+  initBackground() {
+    const canvas = document.getElementById('sq-bg');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const light = this.currentTheme === 'light';
+    let w, h, dpr;
+    const nodes = [];
+    const N = 58;
+    const resize = () => {
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      w = canvas.clientWidth; h = canvas.clientHeight;
+      canvas.width = w * dpr; canvas.height = h * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+    this._onResize = resize; window.addEventListener('resize', resize); resize();
+    for (let i = 0; i < N; i++) {
+      nodes.push({ x: Math.random() * w, y: Math.random() * h, vx: (Math.random() - .5) * .28, vy: (Math.random() - .5) * .28, r: Math.random() * 1.6 + .8 });
+    }
+    const pulses = [];
+    const palette = light
+      ? [[20,165,200],[15,178,150],[108,99,232],[236,74,120]]
+      : [[90,226,255],[63,224,197],[142,140,255],[255,122,156]];
+    const linkC = light ? '70,60,150' : '130,165,150';
+    const linkMax = light ? 0.13 : 0.22;
+    const draw = () => {
+      ctx.clearRect(0, 0, w, h);
+      for (const n of nodes) {
+        n.x += n.vx; n.y += n.vy;
+        if (n.x < 0 || n.x > w) n.vx *= -1;
+        if (n.y < 0 || n.y > h) n.vy *= -1;
+      }
+      for (let i = 0; i < N; i++) {
+        for (let j = i + 1; j < N; j++) {
+          const a = nodes[i], b = nodes[j];
+          const dx = a.x - b.x, dy = a.y - b.y;
+          const d = Math.sqrt(dx * dx + dy * dy);
+          if (d < 150) {
+            const al = (1 - d / 150) * linkMax;
+            ctx.strokeStyle = `rgba(${linkC},${al})`;
+            ctx.lineWidth = 0.7;
+            ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+          }
+        }
+      }
+      for (let k = 0; k < N; k++) {
+        const n = nodes[k];
+        const c = palette[k % palette.length];
+        ctx.beginPath();
+        ctx.fillStyle = `rgba(${c[0]},${c[1]},${c[2]},${light ? .7 : .9})`;
+        ctx.shadowBlur = light ? 6 : 10; ctx.shadowColor = `rgba(${c[0]},${c[1]},${c[2]},.8)`;
+        ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2); ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+      if (Math.random() < 0.04 && pulses.length < 8) {
+        const a = nodes[(Math.random() * N) | 0], b = nodes[(Math.random() * N) | 0];
+        if (a !== b) pulses.push({ a, b, t: 0, c: palette[(Math.random() * palette.length) | 0] });
+      }
+      for (let i = pulses.length - 1; i >= 0; i--) {
+        const p = pulses[i]; p.t += 0.02;
+        if (p.t >= 1) { pulses.splice(i, 1); continue; }
+        const x = p.a.x + (p.b.x - p.a.x) * p.t;
+        const y = p.a.y + (p.b.y - p.a.y) * p.t;
+        ctx.beginPath();
+        ctx.fillStyle = `rgba(${p.c[0]},${p.c[1]},${p.c[2]},${(1 - p.t) * .95})`;
+        ctx.shadowBlur = 14; ctx.shadowColor = `rgba(${p.c[0]},${p.c[1]},${p.c[2]},.9)`;
+        ctx.arc(x, y, 2.2, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
+      }
+      this._raf = requestAnimationFrame(draw);
+    };
+    draw();
+  }
+
+  renderCounters() {
+    const el = document.getElementById('sq-counters');
+    if (!el) return;
+    const data = [
+      { n: 1, s: 'serving' }, { n: 2, s: 'serving' }, { n: 3, s: 'idle' }, { n: 4, s: 'serving' }, { n: 5, s: 'serving' }, { n: 6, s: 'idle' },
+      { n: 7, s: 'serving' }, { n: 8, s: 'serving' }, { n: 9, s: 'serving' }, { n: 10, s: 'closed' }, { n: 11, s: 'closed' }, { n: 12, s: 'idle' },
+    ];
+    const conf = {
+      serving: { label: 'xizmatda', bg: 'linear-gradient(150deg,rgba(var(--a-rgb),.18),rgba(var(--a-rgb),.04))', bd: 'rgba(var(--a-rgb),.4)', dot: 'var(--accent-a)', tc: 'var(--accent-a)' },
+      idle: { label: "bo'sh", bg: 'var(--chip)', bd: 'var(--chip-bd)', dot: 'var(--text-mut)', tc: 'var(--text-dim)' },
+      closed: { label: 'yopiq', bg: 'transparent', bd: 'var(--border)', dot: 'var(--text-mut)', tc: 'var(--text-mut)' },
+    };
+    el.innerHTML = data.map((c) => {
+      const k = conf[c.s];
+      const op = c.s === 'closed' ? 'opacity:.55;' : '';
+      const dash = c.s === 'closed' ? 'border-style:dashed;' : '';
+      const anim = c.s === 'serving' ? 'animation:sq-pulse 2s infinite;' : '';
+      return `<div style="${op}${dash}display:flex;flex-direction:column;align-items:center;gap:7px;padding:12px 4px;border-radius:13px;background:${k.bg};border:1px solid ${k.bd};">
+        <span style="font-family:'Space Grotesk';font-weight:700;font-size:20px;color:var(--text);">${c.n}</span>
+        <span style="display:flex;align-items:center;gap:5px;font-size:9.5px;color:${k.tc};">
+          <span style="width:5px;height:5px;border-radius:50%;background:${k.dot};${anim}"></span>${k.label}
+        </span>
+      </div>`;
+    }).join('');
+  }
+
+  renderQueues() {
+    const el = document.getElementById('sq-queues');
+    if (!el) return;
+    const rows = [
+      { name: 'Naqd pul operatsiyalari', waiting: 14, open: 3, wait: 4 },
+      { name: 'Kredit va to\u2019lovlar', waiting: 11, open: 2, wait: 8 },
+      { name: 'Karta xizmatlari', waiting: 9, open: 2, wait: 6 },
+      { name: 'Valyuta ayirboshlash', waiting: 7, open: 1, wait: 12 },
+      { name: 'Maslahat / konsultatsiya', waiting: 6, open: 0, wait: 15 },
+    ];
+    const sev = (m) => m > 10 ? { c: 'var(--danger)', bg: 'rgba(var(--c-rgb),.14)' } : m > 5 ? { c: 'var(--warn)', bg: 'rgba(var(--warn-rgb),.14)' } : { c: 'var(--ok)', bg: 'rgba(var(--a-rgb),.14)' };
+    el.innerHTML = rows.map((r) => {
+      const s = sev(r.wait);
+      return `<div class="sq-rec" style="display:grid;grid-template-columns:1.6fr .8fr .9fr 1fr;align-items:center;gap:8px;padding:11px 4px;border-radius:10px;border-bottom:1px solid var(--border);">
+        <span style="font-size:13px;color:var(--text);">${r.name}</span>
+        <span style="justify-self:center;font-family:'JetBrains Mono';font-weight:600;font-size:12px;color:${s.c};background:${s.bg};padding:3px 10px;border-radius:99px;">${r.waiting}</span>
+        <span style="justify-self:center;font-size:12px;color:var(--text-dim);">${r.open} ochiq</span>
+        <span style="justify-self:end;font-family:'Space Grotesk';font-weight:600;font-size:13px;color:${s.c};">~${r.wait} daq</span>
+      </div>`;
+    }).join('');
+  }
+
+  renderAnomalies() {
+    const el = document.getElementById('sq-anomalies');
+    if (!el) return;
+    const data = [
+      { type: 'Navbat to\u2019planishi', sev: 'jiddiy', color: 'var(--danger)', rgb: 'var(--c-rgb)', msg: 'Valyuta ayirboshlash navbatida keskin o\u2019sish kuzatildi.', metric: '18 mijoz', exp: '~7', time: '13:42', icon: 'M22 12h-4l-3 9L9 3l-3 9H2' },
+      { type: 'Sekin operator', sev: 'ogohlantirish', color: 'var(--warn)', rgb: 'var(--warn-rgb)', msg: '4-kassada o\u2019rtacha xizmat vaqti me\u2019yordan yuqori.', metric: '5.4 daq/mijoz', exp: '~3.2', time: '13:38', icon: 'M12 8v4l3 3M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20' },
+    ];
+    el.innerHTML = data.map((a) => `
+      <div class="sq-rec" style="display:flex;gap:12px;padding:13px;border-radius:14px;background:rgba(${a.rgb},.1);border:1px solid rgba(${a.rgb},.28);">
+        <div style="flex-shrink:0;width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:rgba(${a.rgb},.12);border:1px solid rgba(${a.rgb},.3);">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="${a.color}" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="${a.icon}"/></svg>
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;">
+            <span style="font-family:'Space Grotesk';font-weight:600;font-size:13.5px;color:var(--text);">${a.type}</span>
+            <span style="font-size:9.5px;font-weight:600;padding:2px 8px;border-radius:99px;background:rgba(${a.rgb},.14);color:${a.color};border:1px solid rgba(${a.rgb},.3);">${a.sev}</span>
+            <span style="font-size:10.5px;color:var(--text-mut);font-family:'JetBrains Mono';margin-left:auto;">${a.time}</span>
+          </div>
+          <p style="margin:6px 0 0;font-size:12.5px;color:var(--text-dim);line-height:1.45;">${a.msg}</p>
+          <p style="margin:4px 0 0;font-size:11px;color:var(--text-mut);">Kuzatilgan: <b style="color:var(--text);">${a.metric}</b> · kutilgan: ${a.exp}</p>
+        </div>
+      </div>`).join('');
+  }
+
+  renderRecs() {
+    const el = document.getElementById('sq-recs');
+    if (!el) return;
+    const data = [
+      { status: 'proposed', icon: 'M12 5v14M5 12h14', action: '10-kassani oching', reason: 'Naqd pul navbati kutish vaqti chegaradan oshdi. Yangi kassa yukni taqsimlaydi.', benefit: 'Kutish ~4 daq kamayadi (8 \u2192 4 daq)' },
+      { status: 'proposed', icon: 'M5 12h14M13 6l6 6-6 6', action: 'Navbatni 7-kassaga yo\u2019naltiring', reason: 'Valyuta navbati to\u2019planmoqda, 7-kassa bo\u2019sh va mos xizmat turini qo\u2019llab-quvvatlaydi.', benefit: 'Kutish ~5 daq kamayadi (12 \u2192 7 daq)' },
+      { status: 'proposed', icon: 'M3 12a9 3 0 0 0 18 0M3 12a9 3 0 0 1 18 0M12 3v18', action: 'Operatorni qayta tayinlang', reason: '4-kassa operatori sekin ishlamoqda — tajribali operatorga almashtirish tavsiya etiladi.', benefit: '1 ta kassa bo\u2019shaydi' },
+      { status: 'accepted', icon: 'M12 5v14M5 12h14', action: '9-kassani oching', reason: 'Tushlik cho\u2019qqisidan oldin qo\u2019shimcha quvvat.', benefit: 'Kutish ~3 daq kamaydi' },
+      { status: 'rejected', icon: 'M5 12h14', action: '11-kassani yoping', reason: 'Past yuklama sababli energiya tejash.', benefit: '' },
+      { status: 'accepted', icon: 'M5 12h14M13 6l6 6-6 6', action: 'Karta navbatini 2-kassaga yo\u2019naltiring', reason: 'Yuk muvozanati optimallashtirildi.', benefit: 'Kutish ~2 daq kamaydi' },
+    ];
+    el.innerHTML = data.map((r) => {
+      const active = r.status === 'proposed';
+      const done = r.status !== 'proposed';
+      const wrapBg = active ? 'linear-gradient(150deg,rgba(var(--c-rgb),.12),rgba(var(--b-rgb),.06))' : 'var(--chip)';
+      const wrapBd = active ? 'rgba(var(--c-rgb),.32)' : 'var(--border)';
+      const op = done ? 'opacity:.62;' : '';
+      let tag = '';
+      if (r.status === 'accepted') tag = `<span style="font-size:9.5px;font-weight:600;padding:2px 8px;border-radius:99px;background:rgba(var(--a-rgb),.15);color:var(--ok);">Qabul qilindi</span>`;
+      if (r.status === 'rejected') tag = `<span style="font-size:9.5px;font-weight:600;padding:2px 8px;border-radius:99px;background:var(--chip);color:var(--text-dim);">Rad etildi</span>`;
+      const benefit = r.benefit ? `<p style="margin:8px 0 0;display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--ok);"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M7 7l10 10M17 7v10H7"/></svg>${r.benefit}</p>` : '';
+      const btns = active ? `<div style="display:flex;gap:8px;margin-top:12px;">
+          <button class="sq-btn" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;height:36px;border:none;border-radius:10px;cursor:pointer;font-family:'Sora';font-weight:600;font-size:12.5px;color:var(--ok-ink);background:linear-gradient(100deg,var(--accent-a),var(--accent-b));box-shadow:0 8px 22px -10px rgba(var(--a-rgb),.7);">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M20 6 9 17l-5-5"/></svg>Qabul</button>
+          <button class="sq-mini" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;height:36px;border:1px solid var(--chip-bd);border-radius:10px;cursor:pointer;font-family:'Sora';font-weight:600;font-size:12.5px;color:var(--text-dim);background:var(--chip);">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M18 6 6 18M6 6l12 12"/></svg>Rad</button>
+        </div>` : '';
+      return `<div class="sq-rec" style="${op}border-radius:15px;padding:15px;background:${wrapBg};border:1px solid ${wrapBd};">
+        <div style="display:flex;align-items:center;gap:9px;">
+          <span style="flex-shrink:0;width:26px;height:26px;border-radius:8px;display:grid;place-items:center;background:rgba(var(--c-rgb),.16);border:1px solid rgba(var(--c-rgb),.3);">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent-c)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${r.icon}"/></svg>
+          </span>
+          <strong style="font-family:'Space Grotesk';font-weight:600;font-size:14px;color:var(--text);flex:1;">${r.action}</strong>
+          ${tag}
+        </div>
+        <p style="margin:9px 0 0;font-size:12.5px;color:var(--text-dim);line-height:1.5;">${r.reason}</p>
+        ${benefit}
+        ${btns}
+      </div>`;
+    }).join('');
+  }
+
+  drawForecast() {
+    const el = document.getElementById('sq-forecast');
+    if (!el) return;
+    const W = 640, H = 250, padL = 8, padR = 8, padT = 14, padB = 26;
+    const pred = [12,10,9,8,11,18,27,35,41,45,47,53,59,48,37,29,33,42,51,56,47,35,23,15];
+    const lower = pred.map((v) => Math.max(0, v * 0.78));
+    const upper = pred.map((v) => v * 1.22);
+    const maxY = 74;
+    const n = pred.length;
+    const X = (i) => padL + (i / (n - 1)) * (W - padL - padR);
+    const Y = (v) => padT + (1 - v / maxY) * (H - padT - padB);
+    const smooth = (pts) => {
+      let d = `M ${pts[0][0]} ${pts[0][1]}`;
+      for (let i = 0; i < pts.length - 1; i++) {
+        const [x0, y0] = pts[i], [x1, y1] = pts[i + 1];
+        const cx = (x0 + x1) / 2;
+        d += ` C ${cx} ${y0} ${cx} ${y1} ${x1} ${y1}`;
+      }
+      return d;
+    };
+    const predPts = pred.map((v, i) => [X(i), Y(v)]);
+    const upPts = upper.map((v, i) => [X(i), Y(v)]);
+    const loPts = lower.map((v, i) => [X(i), Y(v)]);
+    const lineD = smooth(predPts);
+    const bandTop = smooth(upPts);
+    const bandBotRev = smooth([...loPts].reverse());
+    const bandD = `${bandTop} L ${loPts[n-1][0]} ${loPts[n-1][1]} ${bandBotRev.replace(/^M [^C]+/, '')} Z`;
+    const areaD = `${lineD} L ${X(n-1)} ${Y(0)} L ${X(0)} ${Y(0)} Z`;
+    const labels = ['00','04','08','12','16','20'];
+    const gridY = [0, 25, 50].map((v) => Y(v));
+    const grid = gridY.map((y) => `<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" style="stroke:rgba(var(--b-rgb),.09)" stroke-width="1"/>`).join('');
+    const xlab = labels.map((l, i) => `<text x="${X(i * 4)}" y="${H-6}" style="fill:var(--text-mut)" font-size="10" font-family="JetBrains Mono" text-anchor="middle">${l}:00</text>`).join('');
+    const peakI = pred.indexOf(Math.max(...pred));
+    el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="width:100%;height:100%;overflow:visible;">
+      <defs>
+        <linearGradient id="sqLine" x1="0" y1="0" x2="1" y2="0"><stop offset="0" style="stop-color:var(--accent-d)"/><stop offset=".35" style="stop-color:var(--accent-a)"/><stop offset=".7" style="stop-color:var(--accent-b)"/><stop offset="1" style="stop-color:var(--accent-c)"/></linearGradient>
+        <linearGradient id="sqArea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:rgba(var(--d-rgb),.30)"/><stop offset="1" style="stop-color:rgba(var(--d-rgb),0)"/></linearGradient>
+        <filter id="sqGlow" x="-20%" y="-40%" width="140%" height="180%"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      </defs>
+      ${grid}
+      <path d="${bandD}" style="fill:rgba(var(--d-rgb),.12)"/>
+      <path d="${areaD}" fill="url(#sqArea)"/>
+      <path d="${lineD}" fill="none" stroke="url(#sqLine)" stroke-width="2.6" stroke-linecap="round" filter="url(#sqGlow)" stroke-dasharray="1600" stroke-dashoffset="1600" style="animation:sq-dash 1.8s cubic-bezier(.4,0,.2,1) .3s forwards;"/>
+      <circle cx="${X(peakI)}" cy="${Y(pred[peakI])}" r="5" style="fill:var(--accent-c)" stroke="#fff" stroke-width="1.5"><animate attributeName="r" values="5;7;5" dur="2s" repeatCount="indefinite"/></circle>
+      <circle cx="${X(peakI)}" cy="${Y(pred[peakI])}" r="11" style="fill:rgba(var(--c-rgb),.25)"><animate attributeName="r" values="8;16;8" dur="2s" repeatCount="indefinite"/><animate attributeName="opacity" values=".5;0;.5" dur="2s" repeatCount="indefinite"/></circle>
+      ${xlab}
+    </svg>`;
+  }
+}
+</script>
+</body>
+</html>

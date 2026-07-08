@@ -4,6 +4,10 @@
   style="z-index:0;background:radial-gradient(circle at 50% 50%, transparent 52%, var(--vignette) 100%);"
 ></div>
 
+<div class="fixed" style="z-index:10;top:20px;right:22px;">
+  <app-theme-switcher />
+</div>
+
 <div class="relative grid min-h-screen grid-cols-1 md:grid-cols-2" style="z-index:2;">
   <!-- LEFT — forma -->
   <div class="sq-rise flex flex-col justify-center px-6 py-12">
@@ -111,7 +115,7 @@
   <!-- RIGHT — brand panel -->
   <div
     class="relative flex flex-col justify-center overflow-hidden max-md:hidden"
-    style="padding:56px;border-left:1px solid var(--border);background:linear-gradient(150deg,rgba(var(--a-rgb),.16),rgba(var(--b-rgb),.10) 55%,rgba(var(--c-rgb),.12)),linear-gradient(160deg,#111917,#0e1512);"
+    style="padding:56px;border-left:1px solid var(--border);background:linear-gradient(150deg,rgba(var(--a-rgb),.16),rgba(var(--b-rgb),.10) 55%,rgba(var(--c-rgb),.12)),var(--brand-base);"
   >
     <div class="absolute" style="top:-90px;right:-90px;width:360px;height:360px;border-radius:50%;background:radial-gradient(circle,rgba(var(--d-rgb),.22),transparent 68%);"></div>
     <div class="absolute" style="bottom:-110px;left:-90px;width:380px;height:380px;border-radius:50%;background:radial-gradient(circle,rgba(var(--c-rgb),.18),transparent 68%);"></div>

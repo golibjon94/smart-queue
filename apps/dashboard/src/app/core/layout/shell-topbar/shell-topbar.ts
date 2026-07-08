@@ -3,13 +3,13 @@ import { MenuItem } from 'primeng/api';
 import { MenuModule } from 'primeng/menu';
 
 import { AuthService } from '../../auth/auth.service';
-import { ThemeService } from '../../theme/theme.service';
+import { ThemeSwitcher } from '../../theme/theme-switcher/theme-switcher';
 import { LayoutService } from '../layout.service';
 
 @Component({
   selector: 'app-shell-topbar',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [MenuModule],
+  imports: [MenuModule, ThemeSwitcher],
   host: { class: 'contents' },
   template: `
     <header
@@ -55,15 +55,8 @@ import { LayoutService } from '../layout.service';
         <span class="absolute" style="top:8px;right:9px;width:7px;height:7px;border-radius:50%;background:var(--danger);box-shadow:0 0 0 2px var(--bg);"></span>
       </button>
 
-      <!-- theme toggle -->
-      <button
-        class="sq-mini grid place-items-center"
-        style="width:38px;height:38px;border-radius:11px;border:1px solid var(--chip-bd);background:var(--chip);color:var(--text-dim);cursor:pointer;"
-        [title]="theme.isDark() ? 'Yorug‘ rejim' : 'Qorong‘i rejim'"
-        (click)="theme.toggle()"
-      >
-        <i [class]="theme.isDark() ? 'pi pi-sun' : 'pi pi-moon'" style="font-size:16px;"></i>
-      </button>
+      <!-- theme switcher (5 preset) -->
+      <app-theme-switcher />
 
       <!-- user pill -->
       <button
@@ -84,7 +77,6 @@ import { LayoutService } from '../layout.service';
 })
 export class ShellTopbar {
   protected readonly layout = inject(LayoutService);
-  protected readonly theme = inject(ThemeService);
   private readonly auth = inject(AuthService);
 
   protected readonly user = this.auth.user;
