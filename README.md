@@ -15,6 +15,7 @@
 | [`docs/ROADMAP.md`](docs/ROADMAP.md) | Fazalar 0→3 |
 | [`docs/PLAN.md`](docs/PLAN.md) | Faza 0 vazifalar rejasi |
 | [`docs/DEMO_SCENARIO.md`](docs/DEMO_SCENARIO.md) | 5 qadamli demo ssenariysi |
+| [`docs/PYTHON_AI_HISOBOT.md`](docs/PYTHON_AI_HISOBOT.md) | Python/AI qismi — generator, LightGBM, Erlang-C |
 
 ## Tuzilish
 
