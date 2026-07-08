@@ -10,7 +10,7 @@
 
 1. `docker compose up` — barcha servislar ko'tarilgan (DB, ML, gateway, dashboard).
 2. Sintetik tarix yuklangan (270 kun), model o'qitilgan, 72 soatlik bashorat `forecasts`da.
-3. Dashboard brauzerda ochiq: `http://localhost:4200`, **Filial 1**, ssenariy "normal".
+3. Dashboard brauzerda ochiq: `http://localhost:4300`, **Filial 1**, ssenariy "normal".
 4. Zaxira: skrinshotlar papkasi (agar jonli demo texnik muammoga uchrasa).
 
 ---

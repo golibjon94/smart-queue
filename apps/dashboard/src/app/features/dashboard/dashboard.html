@@ -1,197 +1,32 @@
-<div class="layout">
-  <!-- Topbar -->
-  <header class="topbar">
-    <div class="brand">
-      <div class="logo"><i class="pi pi-bolt"></i></div>
-      <div class="brand-text">
-        <span class="name">smart-queue</span>
-        <span class="branch">{{ state()?.branchName ?? '...' }}</span>
-      </div>
-    </div>
+<app-dashboard-header
+  [branchName]="store.branchName()"
+  [connectionError]="store.connectionError()"
+  [isPeak]="store.isPeak()"
+  [scenarioLoading]="store.scenarioLoading()"
+  (toggleScenario)="store.toggleScenario()"
+/>
 
-    <div class="topbar-actions">
-      @if (connectionError()) {
-        <p-tag severity="danger" icon="pi pi-exclamation-triangle" value="Aloqa yo'q" />
-      }
-      <p-button
-        [label]="isPeak() ? 'Normal holatga qaytish' : 'Demo: tushlik cho\'qqisi'"
-        [icon]="isPeak() ? 'pi pi-stop-circle' : 'pi pi-play-circle'"
-        [severity]="isPeak() ? 'danger' : 'primary'"
-        (onClick)="toggleScenario()"
-      />
-      <button class="user-btn" (click)="menu.toggle($event)">
-        <p-avatar
-          [label]="(user()?.username ?? 'A')[0].toUpperCase()"
-          shape="circle"
-          styleClass="user-avatar"
-        />
-        <span class="user-name">{{ user()?.fullName ?? user()?.username }}</span>
-        <i class="pi pi-angle-down"></i>
-      </button>
-      <p-menu #menu [model]="userMenu" [popup]="true" />
-    </div>
-  </header>
+<app-kpi-cards
+  class="mb-5"
+  [totalWaiting]="store.state()?.totalWaiting ?? null"
+  [avgWaitMin]="store.state()?.avgWaitMin ?? null"
+  [openCounters]="store.openCounters()"
+  [totalCounters]="store.totalCounters()"
+  [proposedCount]="store.proposedCount()"
+/>
 
-  <main class="content">
-    <!-- KPI kartalar -->
-    <section class="kpis">
-      <div class="kpi">
-        <div class="kpi-icon i-blue"><i class="pi pi-users"></i></div>
-        <div class="kpi-body">
-          <span class="kpi-value">{{ state()?.totalWaiting ?? '—' }}</span>
-          <span class="kpi-label">Navbatda kutmoqda</span>
-        </div>
-      </div>
-      <div class="kpi">
-        <div class="kpi-icon i-amber"><i class="pi pi-clock"></i></div>
-        <div class="kpi-body">
-          <span class="kpi-value">~{{ state()?.avgWaitMin ?? '—' }} <small>daq</small></span>
-          <span class="kpi-label">O'rtacha kutish</span>
-        </div>
-      </div>
-      <div class="kpi">
-        <div class="kpi-icon i-green"><i class="pi pi-desktop"></i></div>
-        <div class="kpi-body">
-          <span class="kpi-value">{{ openCounters() }}<small>/{{ totalCounters() }}</small></span>
-          <span class="kpi-label">Ochiq kassalar</span>
-        </div>
-      </div>
-      <div class="kpi">
-        <div class="kpi-icon i-violet"><i class="pi pi-bell"></i></div>
-        <div class="kpi-body">
-          <span class="kpi-value">{{ proposedCount() }}</span>
-          <span class="kpi-label">Faol tavsiyalar</span>
-        </div>
-      </div>
-    </section>
+<div class="grid grid-cols-1 items-start gap-[18px] lg:grid-cols-[5fr_7fr]">
+  <div class="flex flex-col gap-[18px]">
+    <app-counters-panel [counters]="store.state()?.counters ?? []" />
+    <app-queues-table [queues]="store.state()?.queues ?? []" />
+  </div>
 
-    <div class="grid">
-      <!-- Chap ustun -->
-      <div class="col-left">
-        <p-card>
-          <ng-template #title><span class="card-title">Kassalar holati</span></ng-template>
-          <div class="counters">
-            @for (c of state()?.counters ?? []; track c.counterId) {
-              <div class="counter" [class]="'cs-' + c.status">
-                <span class="c-num">{{ c.number }}</span>
-                <p-tag [severity]="counterSeverity(c.status)" [value]="counterLabel(c.status)" />
-              </div>
-            }
-          </div>
-        </p-card>
-
-        <p-card>
-          <ng-template #title><span class="card-title">Navbatlar</span></ng-template>
-          <p-table [value]="state()?.queues ?? []" styleClass="p-datatable-sm queues-table">
-            <ng-template #header>
-              <tr>
-                <th>Xizmat turi</th>
-                <th class="ta-center">Kutmoqda</th>
-                <th class="ta-center">Kassalar</th>
-                <th class="ta-right">Taxminiy kutish</th>
-              </tr>
-            </ng-template>
-            <ng-template #body let-q>
-              <tr>
-                <td>{{ q.name }}</td>
-                <td class="ta-center">
-                  <p-tag [severity]="waitSeverity(q.estWaitMin)" [value]="q.waiting.toString()" />
-                </td>
-                <td class="ta-center muted">{{ q.openCounters }} ochiq</td>
-                <td class="ta-right">
-                  <span class="wait" [class]="'w-' + waitSeverity(q.estWaitMin)">
-                    ~{{ q.estWaitMin }} daq
-                  </span>
-                </td>
-              </tr>
-            </ng-template>
-          </p-table>
-        </p-card>
-      </div>
-
-      <!-- O'ng ustun -->
-      <div class="col-right">
-        <p-card>
-          <ng-template #title>
-            <div class="card-title-row">
-              <span class="card-title">Kelish oqimi bashorati — 48 soat</span>
-              @if (forecast()?.model_version) {
-                <span class="model-badge">
-                  <i class="pi pi-microchip-ai"></i> LightGBM v{{ forecast()?.model_version }}
-                </span>
-              }
-            </div>
-          </ng-template>
-          <div class="chart-wrap">
-            @if (chartData()) {
-              <p-chart type="line" [data]="chartData()" [options]="chartOptions" height="260px" />
-            } @else {
-              <div class="chart-empty">Bashorat yuklanmoqda...</div>
-            }
-          </div>
-        </p-card>
-
-        <p-card>
-          <ng-template #title>
-            <div class="card-title-row">
-              <span class="card-title">Tavsiyalar</span>
-              @if (proposedCount() > 0) {
-                <p-tag severity="warn" [value]="proposedCount() + ' faol'" />
-              }
-            </div>
-          </ng-template>
-
-          @if (recs().length === 0) {
-            <div class="rec-empty">
-              <i class="pi pi-check-circle"></i>
-              <span>Hozircha tavsiya yo'q — tizim holatni kuzatmoqda.</span>
-            </div>
-          }
-
-          <div class="recs">
-            @for (r of recs(); track r.recId) {
-              <div class="rec" [class.done]="r.status !== 'proposed'">
-                <div class="rec-main">
-                  <div class="rec-head">
-                    <i class="pi pi-arrow-right rec-arrow"></i>
-                    <strong>{{ r.action }}</strong>
-                    @if (r.status === 'accepted') {
-                      <p-tag severity="success" value="Qabul qilindi" />
-                    } @else if (r.status === 'rejected') {
-                      <p-tag severity="secondary" value="Rad etildi" />
-                    }
-                  </div>
-                  <p class="rec-reason">{{ r.reason }}</p>
-                  @if (r.benefit['wait_reduction_min'] != null) {
-                    <p class="rec-benefit">
-                      <i class="pi pi-arrow-down-right"></i>
-                      Kutish ~{{ r.benefit['wait_reduction_min'] }} daq kamayadi
-                      ({{ r.benefit['wait_before_min'] }} → {{ r.benefit['wait_after_min'] }} daq)
-                    </p>
-                  } @else if (r.benefit['freed_counters'] != null) {
-                    <p class="rec-benefit">
-                      <i class="pi pi-arrow-down-right"></i>
-                      {{ r.benefit['freed_counters'] }} ta kassa bo'shaydi
-                    </p>
-                  }
-                </div>
-                @if (r.status === 'proposed') {
-                  <div class="rec-actions">
-                    <p-button
-                      icon="pi pi-check" label="Qabul" size="small"
-                      severity="success" (onClick)="respond(r, 'accepted')"
-                    />
-                    <p-button
-                      icon="pi pi-times" label="Rad" size="small"
-                      severity="secondary" [outlined]="true" (onClick)="respond(r, 'rejected')"
-                    />
-                  </div>
-                }
-              </div>
-            }
-          </div>
-        </p-card>
-      </div>
-    </div>
-  </main>
+  <div class="flex flex-col gap-[18px]">
+    <app-forecast-chart [forecast]="store.forecast()" />
+    <app-recommendations-panel
+      [recommendations]="store.recommendations()"
+      [proposedCount]="store.proposedCount()"
+      (respond)="onRespond($event)"
+    />
+  </div>
 </div>

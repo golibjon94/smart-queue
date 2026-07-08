@@ -3,7 +3,7 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
 
-import { GATEWAY_URL } from '../config';
+import { environment } from '../../../environments/environment';
 import { AuthUser, LoginResponse } from './auth.models';
 
 const TOKEN_KEY = 'sq_token';
@@ -21,7 +21,7 @@ export class AuthService {
 
   login(username: string, password: string): Observable<LoginResponse> {
     return this.http
-      .post<LoginResponse>(`${GATEWAY_URL}/api/auth/login`, { username, password })
+      .post<LoginResponse>(`${environment.gatewayUrl}/api/auth/login`, { username, password })
       .pipe(tap((res) => this.store(res)));
   }
 

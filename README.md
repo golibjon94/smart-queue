@@ -56,7 +56,7 @@ cd ../..
 docker compose -f infra/docker-compose.yml --env-file .env up -d --build
 ```
 
-Dashboard: **http://localhost:4200** · Gateway: `:5080` · ML API (Swagger): `:8000/docs`
+Dashboard: **http://localhost:4300** · Gateway: `:5080` · ML API (Swagger): `:8000/docs`
 
 **Kirish (default admin):** `admin` / `Admin!2026` — birinchi startup'da avtomatik
 yaratiladi (`.env` orqali o'zgartiriladi). Login sahifasi JWT bilan himoyalangan.

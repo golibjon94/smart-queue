@@ -1,0 +1,17 @@
+/* Tailwind CSS v4 + PrimeNG integratsiyasi.
+   Layer tartibi: primeng layer 'base' dan keyin, 'utilities' dan oldin —
+   shunda Tailwind utility'lari PrimeNG komponent stillarini override qila oladi.
+   Bu tartib providePrimeNG cssLayer { name: 'primeng', order: 'theme, base, primeng' } bilan mos. */
+@layer theme, base, primeng, components, utilities;
+
+@import "tailwindcss";
+@import "tailwindcss-primeui";
+
+/* Dark mode: app.config'dagi darkModeSelector '.app-dark' bilan bir xil selektor.
+   dark: variant'lari <html class="app-dark"> qo'shilganda faollashadi. */
+@custom-variant dark (&:where(.app-dark, .app-dark *));
+
+/* Loyiha shrifti — Tailwind preflight default font stack'ini almashtiradi. */
+@theme {
+  --font-sans: 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif;
+}

@@ -1,14 +1,23 @@
-<div class="login-page">
-  <div class="login-card">
-    <div class="brand">
-      <div class="logo"><i class="pi pi-bolt"></i></div>
-      <h1>smart-queue</h1>
-      <p>Aqlli navbat boshqaruvi</p>
+<div class="grid h-full grid-cols-1 md:grid-cols-2">
+  <!-- Chap: forma -->
+  <div class="mx-auto flex w-full max-w-[460px] flex-col justify-center gap-7 px-14 py-12">
+    <div class="text-center">
+      <div
+        class="mx-auto mb-3.5 grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-primary-500 to-primary-700 text-[26px] text-white"
+      >
+        <i class="pi pi-bolt"></i>
+      </div>
+      <h1 class="m-0 text-[26px] font-bold tracking-tight text-surface-900 dark:text-surface-0">
+        smart-queue
+      </h1>
+      <p class="mt-1 text-sm text-surface-500 dark:text-surface-400">Aqlli navbat boshqaruvi</p>
     </div>
 
-    <form class="form" (ngSubmit)="submit()">
-      <div class="field">
-        <label for="username">Login</label>
+    <form class="flex flex-col gap-[18px]" (ngSubmit)="submit()">
+      <div class="flex flex-col gap-[7px]">
+        <label for="username" class="text-[13px] font-semibold text-surface-900 dark:text-surface-0">
+          Login
+        </label>
         <input
           pInputText
           id="username"
@@ -21,8 +30,10 @@
         />
       </div>
 
-      <div class="field">
-        <label for="password">Parol</label>
+      <div class="flex flex-col gap-[7px]">
+        <label for="password" class="text-[13px] font-semibold text-surface-900 dark:text-surface-0">
+          Parol
+        </label>
         <p-password
           inputId="password"
           name="password"
@@ -44,23 +55,37 @@
         label="Kirish"
         icon="pi pi-sign-in"
         [loading]="loading()"
-        styleClass="w-full login-btn"
+        styleClass="mt-1 w-full"
       />
     </form>
 
-    <div class="hint">
+    <div class="text-center text-[13px] text-surface-500 dark:text-surface-400">
       <i class="pi pi-info-circle"></i>
-      Demo uchun: <code>admin</code> / <code>Admin!2026</code>
+      Demo uchun:
+      <code class="rounded bg-surface-100 px-1.5 py-0.5 text-xs text-surface-900 dark:bg-surface-800 dark:text-surface-0">admin</code>
+      /
+      <code class="rounded bg-surface-100 px-1.5 py-0.5 text-xs text-surface-900 dark:bg-surface-800 dark:text-surface-0">Admin!2026</code>
     </div>
   </div>
 
-  <div class="login-side">
-    <div class="side-content">
-      <h2>Bashorat qiladi. Boshqaradi. Maslahat beradi.</h2>
-      <ul>
-        <li><i class="pi pi-chart-line"></i> Mijoz oqimini oldindan ko'radi</li>
-        <li><i class="pi pi-sitemap"></i> Kassalarni real vaqtda optimallashtiradi</li>
-        <li><i class="pi pi-comments"></i> O'zbek tilida aniq tavsiya beradi</li>
+  <!-- O'ng: brend paneli -->
+  <div
+    class="flex items-center bg-gradient-to-br from-primary-600 to-primary-800 p-12 text-white max-md:hidden"
+  >
+    <div class="mx-auto max-w-[400px]">
+      <h2 class="mb-7 text-3xl font-bold leading-tight">
+        Bashorat qiladi. Boshqaradi. Maslahat beradi.
+      </h2>
+      <ul class="m-0 flex list-none flex-col gap-4 p-0">
+        <li class="flex items-center gap-3 text-[15px] opacity-95">
+          <i class="pi pi-chart-line w-[22px] text-lg"></i> Mijoz oqimini oldindan ko'radi
+        </li>
+        <li class="flex items-center gap-3 text-[15px] opacity-95">
+          <i class="pi pi-sitemap w-[22px] text-lg"></i> Kassalarni real vaqtda optimallashtiradi
+        </li>
+        <li class="flex items-center gap-3 text-[15px] opacity-95">
+          <i class="pi pi-comments w-[22px] text-lg"></i> O'zbek tilida aniq tavsiya beradi
+        </li>
       </ul>
     </div>
   </div>

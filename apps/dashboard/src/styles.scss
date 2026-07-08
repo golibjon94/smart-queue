@@ -1,9 +1,9 @@
-/* Global stillar */
-* { box-sizing: border-box; }
+/* Global stillar. Reset/box-sizing/margin — Tailwind preflight (base layer) tomonidan.
+   Bu yerda faqat preflight bermaydigan bir nechta bazaviy narsa. */
+html {
+  -webkit-font-smoothing: antialiased;
+}
 
 body {
-  margin: 0;
-  font-family: 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif;
-  color: #111827;
-  -webkit-font-smoothing: antialiased;
+  color: var(--p-text-color);
 }
