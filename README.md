@@ -8,14 +8,17 @@
 
 | Hujjat | Mazmun |
 |--------|--------|
+| [`docs/LOYIHA_HOLATI.md`](docs/LOYIHA_HOLATI.md) | **Handoff / umumiy holat — davom ettirish uchun avval shuni o'qing** |
 | [`docs/README.md`](docs/README.md) | Loyiha nima, tamoyillar |
-| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Texnik arxitektura |
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Umumiy texnik arxitektura |
 | [`docs/TECH_STACK.md`](docs/TECH_STACK.md) | Texnologiyalar va asoslash |
 | [`docs/DATABASE.md`](docs/DATABASE.md) | DB sxema (TimescaleDB) |
 | [`docs/ROADMAP.md`](docs/ROADMAP.md) | Fazalar 0→3 |
 | [`docs/PLAN.md`](docs/PLAN.md) | Faza 0 vazifalar rejasi |
 | [`docs/DEMO_SCENARIO.md`](docs/DEMO_SCENARIO.md) | 5 qadamli demo ssenariysi |
 | [`docs/PYTHON_AI_HISOBOT.md`](docs/PYTHON_AI_HISOBOT.md) | Python/AI qismi — generator, LightGBM, Erlang-C |
+| [`services/gateway/ARCHITECTURE.md`](services/gateway/ARCHITECTURE.md) | Gateway (.NET) ichki arxitektura |
+| [`apps/dashboard/ARCHITECTURE.md`](apps/dashboard/ARCHITECTURE.md) | Dashboard (Angular) ichki arxitektura |
 
 ## Tuzilish
 
