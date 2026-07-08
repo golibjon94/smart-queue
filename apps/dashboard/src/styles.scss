@@ -1,9 +1,13 @@
 /* Global stillar. Reset/box-sizing/margin — Tailwind preflight (base layer) tomonidan.
-   Bu yerda faqat preflight bermaydigan bir nechta bazaviy narsa. */
+   Aurora tokenlar aurora-tokens.css'da (angular.json styles). */
 html {
   -webkit-font-smoothing: antialiased;
+  background: var(--bg);
 }
 
 body {
-  color: var(--p-text-color);
+  margin: 0;
+  color: var(--text);
+  background: var(--bg);
+  font-family: 'Sora', system-ui, sans-serif;
 }

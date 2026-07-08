@@ -1,0 +1,142 @@
+/* =====================================================================
+   smart-queue · "Aurora Obsidian" design tokens + interaction classes.
+   Dark is the default; ThemeService sets data-theme="light|dark" on <html>.
+   Har qiymat CSS custom property orqali — bitta override butun ilovani qayta bo'yaydi.
+   ===================================================================== */
+
+:root,
+[data-theme='dark'] {
+  --a-rgb: 63, 224, 197; /* mint-teal  */
+  --b-rgb: 142, 140, 255; /* iris       */
+  --c-rgb: 255, 122, 156; /* coral-pink */
+  --warn-rgb: 255, 179, 92; /* amber      */
+
+  --accent-a: rgb(var(--a-rgb));
+  --accent-b: rgb(var(--b-rgb));
+  --accent-c: rgb(var(--c-rgb));
+  --grad: linear-gradient(100deg, var(--accent-a), var(--accent-b) 52%, var(--accent-c));
+
+  --ok: rgb(var(--a-rgb));
+  --warn: rgb(var(--warn-rgb));
+  --danger: rgb(var(--c-rgb));
+
+  --bg: #060a16;
+  --bg-radials:
+    radial-gradient(1150px 680px at 82% -10%, rgba(var(--c-rgb), 0.14), transparent 58%),
+    radial-gradient(950px 600px at -6% 8%, rgba(var(--b-rgb), 0.18), transparent 56%),
+    radial-gradient(900px 760px at 50% 55%, rgba(88, 130, 255, 0.08), transparent 60%);
+  --vignette: rgba(6, 10, 22, 0.78);
+
+  --panel-1: rgba(26, 21, 42, 0.62);
+  --panel-2: rgba(14, 11, 24, 0.5);
+  --panel-alt-1: rgba(30, 20, 44, 0.64);
+  --panel-alt-2: rgba(14, 11, 26, 0.5);
+
+  --border: rgba(150, 140, 220, 0.14);
+  --border-strong: rgba(150, 140, 220, 0.36);
+  --border-accent: rgba(var(--c-rgb), 0.24);
+
+  --chip: rgba(255, 255, 255, 0.03);
+  --chip-bd: rgba(150, 140, 220, 0.13);
+
+  --text: #ecebf7;
+  --text-dim: #a49ec4;
+  --text-mut: #6a648f;
+
+  --shadow: 0 22px 54px -26px rgba(0, 0, 0, 0.75);
+  --inset: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  --ok-ink: #03241d;
+  --canvas-op: 0.9;
+
+  --r-sm: 10px;
+  --r-md: 14px;
+  --r-lg: 18px;
+  --r-xl: 20px;
+  --r-pill: 999px;
+}
+
+[data-theme='light'] {
+  --a-rgb: 15, 178, 150;
+  --b-rgb: 108, 99, 232;
+  --c-rgb: 236, 74, 120;
+  --warn-rgb: 214, 132, 36;
+
+  --bg: #f2f1fb;
+  --bg-radials:
+    radial-gradient(1150px 680px at 82% -10%, rgba(var(--c-rgb), 0.14), transparent 58%),
+    radial-gradient(950px 600px at -6% 8%, rgba(var(--a-rgb), 0.13), transparent 55%),
+    radial-gradient(800px 900px at 55% 120%, rgba(var(--b-rgb), 0.1), transparent 60%);
+  --vignette: rgba(242, 241, 251, 0.55);
+
+  --panel-1: rgba(255, 255, 255, 0.92);
+  --panel-2: rgba(255, 255, 255, 0.7);
+  --panel-alt-1: rgba(255, 255, 255, 0.94);
+  --panel-alt-2: rgba(252, 250, 255, 0.78);
+
+  --border: rgba(70, 58, 130, 0.13);
+  --border-strong: rgba(70, 58, 130, 0.32);
+  --border-accent: rgba(var(--c-rgb), 0.3);
+
+  --chip: rgba(70, 58, 130, 0.04);
+  --chip-bd: rgba(70, 58, 130, 0.12);
+
+  --text: #1a1730;
+  --text-dim: #5a5578;
+  --text-mut: #8a85a6;
+
+  --shadow: 0 18px 44px -24px rgba(70, 55, 130, 0.28);
+  --inset: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  --ok-ink: #ffffff;
+  --canvas-op: 0.55;
+}
+
+/* ---- keyframes ---- */
+@keyframes sq-spin { to { transform: rotate(360deg); } }
+@keyframes sq-spin-rev { to { transform: rotate(-360deg); } }
+@keyframes sq-pulse { 0%, 100% { opacity: 0.55; transform: scale(1); } 50% { opacity: 1; transform: scale(1.12); } }
+@keyframes sq-pulsedot {
+  0% { box-shadow: 0 0 0 0 rgba(var(--a-rgb), 0.6); }
+  70% { box-shadow: 0 0 0 8px rgba(var(--a-rgb), 0); }
+  100% { box-shadow: 0 0 0 0 rgba(var(--a-rgb), 0); }
+}
+@keyframes sq-rise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes sq-dash { to { stroke-dashoffset: 0; } }
+
+/* ---- entrance + interaction helpers ---- */
+.sq-rise { opacity: 0; animation: sq-rise 0.7s cubic-bezier(0.2, 0.7, 0.3, 1) forwards; }
+
+.sq-card { transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.3, 1), box-shadow 0.5s, border-color 0.5s; }
+.sq-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--border-strong) !important;
+  box-shadow: 0 22px 54px -22px rgba(var(--b-rgb), 0.5), var(--inset) !important;
+}
+
+.sq-navitem { transition: background 0.3s, color 0.3s; }
+.sq-navitem:hover { background: rgba(var(--b-rgb), 0.1); color: var(--text); }
+
+.sq-btn { transition: transform 0.25s, box-shadow 0.3s, filter 0.3s; }
+.sq-btn:hover { transform: translateY(-2px); filter: brightness(1.07); box-shadow: 0 14px 34px -12px rgba(var(--b-rgb), 0.75) !important; }
+.sq-btn:active { transform: translateY(0) scale(0.98); }
+
+.sq-mini { transition: transform 0.3s, background 0.3s, color 0.3s, border-color 0.3s; }
+.sq-mini:hover { background: rgba(var(--b-rgb), 0.12); color: var(--text); transform: translateY(-1px); }
+
+.sq-rec { transition: transform 0.4s cubic-bezier(0.2, 0.7, 0.3, 1), border-color 0.4s, background 0.4s; }
+.sq-rec:hover { transform: translateX(3px); border-color: var(--border-strong) !important; }
+
+/* ---- aurora scrollbar ---- */
+.sq-scroll { scrollbar-width: thin; scrollbar-color: rgba(var(--b-rgb), 0.5) transparent; }
+.sq-scroll::-webkit-scrollbar { width: 7px; }
+.sq-scroll::-webkit-scrollbar-track { background: transparent; margin: 6px 0; }
+.sq-scroll::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--accent-a), var(--accent-c));
+  border-radius: var(--r-pill);
+}
+
+/* ---- respect reduced motion ---- */
+@media (prefers-reduced-motion: reduce) {
+  .sq-rise { opacity: 1; animation: none; }
+  .sq-card, .sq-btn, .sq-mini, .sq-rec, .sq-navitem { transition: none; }
+  *[style*='sq-spin'], *[style*='sq-pulse'], *[style*='sq-pulsedot'] { animation: none !important; }
+}

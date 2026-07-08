@@ -7,7 +7,7 @@
 />
 
 <app-kpi-cards
-  class="mb-5"
+  class="mb-[18px]"
   [totalWaiting]="store.state()?.totalWaiting ?? null"
   [avgWaitMin]="store.state()?.avgWaitMin ?? null"
   [openCounters]="store.openCounters()"
@@ -16,18 +16,28 @@
 />
 
 <div class="grid grid-cols-1 items-start gap-[18px] lg:grid-cols-[5fr_7fr]">
-  <div class="flex flex-col gap-[18px]">
+  <div class="flex min-w-0 flex-col gap-[18px]">
     <app-counters-panel [counters]="store.state()?.counters ?? []" />
     <app-queues-table [queues]="store.state()?.queues ?? []" />
     <app-anomalies-panel [anomalies]="store.anomalies()" />
   </div>
 
-  <div class="flex flex-col gap-[18px]">
-    <app-forecast-chart [forecast]="store.forecast()" />
+  <div class="flex min-w-0 flex-col gap-[18px]">
+    <app-forecast-chart
+      [forecast]="store.forecast()"
+      [hours]="store.forecast()?.points?.length ?? 24"
+    />
     <app-recommendations-panel
       [recommendations]="store.recommendations()"
       [proposedCount]="store.proposedCount()"
       (respond)="onRespond($event)"
     />
   </div>
+</div>
+
+<div
+  class="text-center"
+  style="margin-top:28px;font-size:11px;color:var(--text-mut);font-family:var(--font-mono,'JetBrains Mono');"
+>
+  smart-queue · AI orchestration layer
 </div>

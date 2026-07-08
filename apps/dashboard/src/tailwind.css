@@ -11,7 +11,9 @@
    dark: variant'lari <html class="app-dark"> qo'shilganda faollashadi. */
 @custom-variant dark (&:where(.app-dark, .app-dark *));
 
-/* Loyiha shrifti — Tailwind preflight default font stack'ini almashtiradi. */
+/* Aurora Obsidian shriftlari (Google Fonts index.html'da yuklanadi). */
 @theme {
-  --font-sans: 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif;
+  --font-sans: 'Sora', system-ui, sans-serif;
+  --font-display: 'Space Grotesk', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 }

@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { MenuItem } from 'primeng/api';
-import { AvatarModule } from 'primeng/avatar';
 import { MenuModule } from 'primeng/menu';
 
 import { AuthService } from '../../auth/auth.service';
@@ -10,40 +9,74 @@ import { LayoutService } from '../layout.service';
 @Component({
   selector: 'app-shell-topbar',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [AvatarModule, MenuModule],
+  imports: [MenuModule],
   host: { class: 'contents' },
   template: `
     <header
-      class="sticky top-0 z-10 flex h-16 items-center gap-3 border-b border-surface-200 bg-surface-0 px-5 dark:border-surface-700 dark:bg-surface-900"
+      class="sticky top-0 flex items-center gap-3.5"
+      style="z-index:5;height:66px;padding:0 26px;border-bottom:1px solid var(--border);background:var(--panel-2);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);"
     >
       <button
-        type="button"
-        class="grid h-9 w-9 place-items-center rounded-lg text-surface-500 hover:bg-surface-100 dark:text-surface-400 dark:hover:bg-surface-800"
+        class="sq-mini grid place-items-center"
+        style="width:38px;height:38px;border-radius:11px;border:1px solid var(--chip-bd);background:var(--chip);color:var(--text-dim);cursor:pointer;"
         title="Menyu"
         (click)="layout.toggleSidebar()"
       >
-        <i class="pi pi-bars"></i>
+        <i class="pi pi-bars" style="font-size:16px;"></i>
       </button>
+
+      <!-- search pill (decorative) -->
+      <div
+        class="flex items-center gap-2.5"
+        style="padding:6px 13px;border-radius:99px;background:var(--chip);border:1px solid var(--chip-bd);font-size:12.5px;color:var(--text-dim);min-width:210px;"
+      >
+        <i class="pi pi-search" style="font-size:13px;color:var(--text-mut);"></i>
+        <span class="hidden sm:inline">Qidirish yoki AI'dan so'rash…</span>
+      </div>
 
       <div class="flex-1"></div>
 
+      <!-- Jonli -->
+      <div
+        class="hidden items-center gap-2 sm:flex"
+        style="height:38px;padding:0 14px;border-radius:11px;border:1px solid var(--chip-bd);background:var(--chip);color:var(--text-dim);font-size:12.5px;"
+      >
+        <span style="width:7px;height:7px;border-radius:50%;background:var(--ok);animation:sq-pulsedot 2s infinite;"></span>
+        Jonli
+      </div>
+
+      <!-- bell -->
       <button
-        type="button"
-        class="grid h-9 w-9 place-items-center rounded-lg text-surface-500 hover:bg-surface-100 dark:text-surface-400 dark:hover:bg-surface-800"
+        class="sq-mini relative grid place-items-center"
+        style="width:38px;height:38px;border-radius:11px;border:1px solid var(--chip-bd);background:var(--chip);color:var(--text-dim);cursor:pointer;"
+        title="Bildirishnomalar"
+      >
+        <i class="pi pi-bell" style="font-size:16px;"></i>
+        <span class="absolute" style="top:8px;right:9px;width:7px;height:7px;border-radius:50%;background:var(--danger);box-shadow:0 0 0 2px var(--bg);"></span>
+      </button>
+
+      <!-- theme toggle -->
+      <button
+        class="sq-mini grid place-items-center"
+        style="width:38px;height:38px;border-radius:11px;border:1px solid var(--chip-bd);background:var(--chip);color:var(--text-dim);cursor:pointer;"
         [title]="theme.isDark() ? 'Yorug‘ rejim' : 'Qorong‘i rejim'"
         (click)="theme.toggle()"
       >
-        <i [class]="theme.isDark() ? 'pi pi-sun' : 'pi pi-moon'"></i>
+        <i [class]="theme.isDark() ? 'pi pi-sun' : 'pi pi-moon'" style="font-size:16px;"></i>
       </button>
 
+      <!-- user pill -->
       <button
-        type="button"
-        class="flex cursor-pointer items-center gap-2 rounded-full border border-surface-200 py-1 pl-1 pr-3 text-surface-900 hover:bg-surface-100 dark:border-surface-700 dark:text-surface-0 dark:hover:bg-surface-800"
+        class="sq-mini flex items-center gap-2.5"
+        style="height:38px;padding:3px 12px 3px 4px;border-radius:99px;border:1px solid var(--chip-bd);background:var(--chip);color:var(--text);cursor:pointer;"
         (click)="menu.toggle($event)"
       >
-        <p-avatar [label]="initial()" shape="circle" styleClass="!bg-primary !text-white font-semibold" />
-        <span class="text-[13px] font-medium">{{ user()?.fullName ?? user()?.username }}</span>
-        <i class="pi pi-angle-down text-xs text-surface-500 dark:text-surface-400"></i>
+        <span
+          class="grid place-items-center"
+          style="width:30px;height:30px;border-radius:50%;background:conic-gradient(from 210deg,var(--accent-a),var(--accent-b),var(--accent-c));font-size:12.5px;font-weight:700;color:#0a0d1a;"
+        >{{ initial() }}</span>
+        <span class="hidden sm:inline" style="font-size:12.5px;font-weight:500;">{{ user()?.fullName ?? user()?.username }}</span>
+        <i class="pi pi-angle-down" style="font-size:12px;color:var(--text-mut);"></i>
       </button>
       <p-menu #menu [model]="menuItems()" [popup]="true" />
     </header>

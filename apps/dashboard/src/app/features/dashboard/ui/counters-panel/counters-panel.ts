@@ -1,54 +1,61 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
-import { NgClass } from '@angular/common';
-import { CardModule } from 'primeng/card';
-import { TagModule } from 'primeng/tag';
 
 import { CounterState, CounterStatus } from '../../models';
-
-type Severity = 'info' | 'secondary';
 
 @Component({
   selector: 'app-counters-panel',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgClass, CardModule, TagModule],
+  host: { class: 'block' },
   template: `
-    <p-card>
-      <ng-template #title>
-        <span class="text-[15px] font-semibold text-surface-900 dark:text-surface-0">
-          Kassalar holati
-        </span>
-      </ng-template>
-      <div class="flex flex-wrap gap-2.5">
+    <section
+      class="sq-card sq-rise"
+      style="animation-delay:.26s;border-radius:20px;padding:20px;background:linear-gradient(160deg,var(--panel-1),var(--panel-2));border:1px solid var(--border);box-shadow:var(--inset);"
+    >
+      <div class="mb-4 flex items-center justify-between">
+        <h2 style="margin:0;font-family:var(--font-display,'Space Grotesk');font-weight:600;font-size:15px;color:var(--text);">Kassalar holati</h2>
+        <span style="font-size:11px;color:var(--accent-b);font-family:var(--font-mono,'JetBrains Mono');">{{ counters().length }} ta kassa</span>
+      </div>
+      <div class="grid gap-2.5" style="grid-template-columns:repeat(6,1fr);">
         @for (c of counters(); track c.counterId) {
-          <div
-            class="flex w-[82px] flex-col items-center gap-1.5 rounded-[11px] border-[1.5px] py-3"
-            [ngClass]="variantClass(c.status)"
-          >
-            <span class="text-[22px] font-bold text-surface-900 dark:text-surface-0">{{ c.number }}</span>
-            <p-tag [severity]="severity(c.status)" [value]="label(c.status)" />
+          <div class="flex flex-col items-center gap-[7px]" [style]="tileStyle(c.status)">
+            <span style="font-family:var(--font-display,'Space Grotesk');font-weight:700;font-size:20px;color:var(--text);">{{ c.number }}</span>
+            <span class="flex items-center gap-[5px]" [style.color]="textColor(c.status)" style="font-size:9.5px;">
+              <span [style]="dotStyle(c.status)"></span>{{ label(c.status) }}
+            </span>
           </div>
         } @empty {
-          <span class="text-sm text-surface-500 dark:text-surface-400">Ma'lumot yuklanmoqda...</span>
+          <span style="grid-column:1/-1;font-size:12.5px;color:var(--text-mut);">Ma'lumot yuklanmoqda…</span>
         }
       </div>
-    </p-card>
+    </section>
   `,
 })
 export class CountersPanel {
   readonly counters = input<CounterState[]>([]);
 
-  severity(status: CounterStatus): Severity {
-    return status === 'serving' ? 'info' : 'secondary';
+  label(s: CounterStatus): string {
+    return s === 'serving' ? 'xizmatda' : s === 'idle' ? "bo'sh" : 'yopiq';
   }
 
-  label(status: CounterStatus): string {
-    return status === 'serving' ? 'xizmatda' : status === 'idle' ? "bo'sh" : 'yopiq';
+  textColor(s: CounterStatus): string {
+    return s === 'serving' ? 'var(--accent-a)' : s === 'idle' ? 'var(--text-dim)' : 'var(--text-mut)';
   }
 
-  variantClass(status: CounterStatus): string {
-    const base = 'bg-surface-0 dark:bg-surface-900 border-surface-200 dark:border-surface-700';
-    if (status === 'serving') return 'border-primary-200 bg-primary-50';
-    if (status === 'closed') return `${base} border-dashed opacity-60`;
-    return base;
+  tileStyle(s: CounterStatus): string {
+    const base =
+      'display:flex;flex-direction:column;align-items:center;gap:7px;padding:12px 4px;border-radius:13px;';
+    if (s === 'serving') {
+      return `${base}background:linear-gradient(150deg,rgba(var(--a-rgb),.18),rgba(var(--a-rgb),.04));border:1px solid rgba(var(--a-rgb),.4);`;
+    }
+    if (s === 'closed') {
+      return `${base}background:transparent;border:1px dashed var(--border);opacity:.55;`;
+    }
+    return `${base}background:var(--chip);border:1px solid var(--chip-bd);`;
+  }
+
+  dotStyle(s: CounterStatus): string {
+    const base = 'width:5px;height:5px;border-radius:50%;';
+    if (s === 'serving') return `${base}background:var(--accent-a);animation:sq-pulse 2s infinite;`;
+    return `${base}background:var(--text-mut);`;
   }
 }

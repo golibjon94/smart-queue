@@ -1,0 +1,58 @@
+/* =====================================================================
+   Tailwind v4 + PrimeNG mapping for the Aurora Obsidian theme.
+   Your app already uses Tailwind v4 (@import "tailwindcss") and PrimeNG
+   with darkModeSelector ".app-dark". This file shows how to wire the
+   design tokens into that exact setup.
+
+   1) Import tokens.css once (globally), e.g. in styles.scss:
+        @import "tailwindcss";
+        @import "tailwindcss-primeui";
+        @import "./tokens.css";
+
+   2) Expose tokens to Tailwind utilities via @theme so you can write
+      text-[color:var(--text)] OR the named utilities below.
+   ===================================================================== */
+
+@theme {
+  --color-aurora-a: rgb(63 224 197);
+  --color-aurora-b: rgb(142 140 255);
+  --color-aurora-c: rgb(255 122 156);
+  --color-aurora-warn: rgb(255 179 92);
+
+  --font-display: 'Space Grotesk', system-ui, sans-serif;
+  --font-sans: 'Sora', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  --radius-card: 20px;
+}
+
+/* --------------------------------------------------------------------- */
+/* Theme switching                                                        */
+/* The prototype toggles data-theme on its root. In your Angular app the  */
+/* ThemeService already toggles ".app-dark" on <html>. Bridge them:       */
+/* --------------------------------------------------------------------- */
+
+/* light is the DEFAULT (no class); tokens.css :root holds DARK defaults, */
+/* so invert here: apply the light token block when .app-dark is ABSENT.  */
+:root:not(.app-dark) { /* re-declare the [data-theme="light"] block, or: */
+  /* simplest: keep tokens.css as-is (dark default) and set data-theme    */
+  /* on <html> instead of .app-dark. If you must keep .app-dark, copy the */
+  /* [data-theme="light"] custom properties here.                         */
+}
+
+/* Recommended: drive both off one attribute in ThemeService —
+   this.document.documentElement.setAttribute('data-theme', mode); */
+
+/* --------------------------------------------------------------------- */
+/* PrimeNG surface bridge (optional)                                      */
+/* Map a few PrimeNG design tokens to the aurora palette so p-card,       */
+/* p-tag, p-button inherit the look without per-component overrides.      */
+/* --------------------------------------------------------------------- */
+:root {
+  --p-primary-color: var(--accent-b);
+  --p-primary-500: var(--accent-b);
+  --p-content-background: var(--panel-1);
+  --p-content-border-color: var(--border);
+  --p-text-color: var(--text);
+  --p-text-muted-color: var(--text-dim);
+}

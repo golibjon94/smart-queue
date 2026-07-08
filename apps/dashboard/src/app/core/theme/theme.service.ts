@@ -4,13 +4,14 @@ import { Injectable, computed, effect, inject, signal } from '@angular/core';
 export type ThemeMode = 'light' | 'dark';
 
 const STORAGE_KEY = 'sq_theme';
-const DARK_CLASS = 'app-dark'; // app.config darkModeSelector + tailwind @custom-variant bilan mos
+const DARK_CLASS = 'app-dark'; // PrimeNG darkModeSelector + tailwind @custom-variant
 
 /**
  * Ilova mavzusi (light/dark). Holat signalda, localStorage'da saqlanadi,
  * birinchi yuklashda tizim sozlamasiga (prefers-color-scheme) qaraydi.
- * effect() <html> ga .app-dark klassini qo'yadi — PrimeNG tokenlari va
- * Tailwind dark: variantlari shunda avtomatik almashadi.
+ * effect() <html> ga bitta manba sifatida `data-theme` atributini qo'yadi —
+ * Aurora tokenlari (aurora-tokens.css) shunga qarab almashadi. PrimeNG uchun
+ * `.app-dark` klassi ham parallel qo'yiladi (toast, login inputlari).
  */
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
@@ -22,9 +23,11 @@ export class ThemeService {
 
   constructor() {
     effect(() => {
-      const dark = this._mode() === 'dark';
-      this.document.documentElement.classList.toggle(DARK_CLASS, dark);
-      localStorage.setItem(STORAGE_KEY, this._mode());
+      const mode = this._mode();
+      const root = this.document.documentElement;
+      root.setAttribute('data-theme', mode);
+      root.classList.toggle(DARK_CLASS, mode === 'dark');
+      localStorage.setItem(STORAGE_KEY, mode);
     });
   }
 

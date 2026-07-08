@@ -52,9 +52,10 @@ src/
     │   │   ├── shell-topbar/
     │   │   ├── layout.service.ts #   sidebar collapse holati
     │   │   └── nav.ts            #   sidebar navigatsiya modeli (data)
-    │   ├── theme/                #   dark/light mode (ThemeService)
+    │   ├── theme/                #   dark/light mode (ThemeService, data-theme)
     │   ├── realtime/             #   SignalR client (RealtimeService) — Faza 1
     │   └── notifications/        #   toast wrapper (NotificationService)
+    │       (layout ichida: neural-background — to'liq ekran neyron-to'r canvas)
     │
     ├── features/                 # biznes bo'limlari (har biri o'zicha mustaqil)
     │   ├── dashboard/
@@ -75,7 +76,8 @@ src/
     │   └── login/                #   login sahifasi
     │
     └── shared/                   # bir nechta feature ishlatadigan umumiy
-        └── placeholder/          #   "Tez orada" sahifasi
+        ├── placeholder/          #   "Tez orada" sahifasi
+        └── count-up/             #   raqamlarni animatsiya bilan sanaydigan direktiva
 ```
 
 **Qatlamlar mas'uliyati:**
@@ -214,13 +216,34 @@ Autentifikatsiyadan o'tgan barcha sahifalar **`AppShell`** ichida:
 
 - Holat `signal<'light'|'dark'>`, `localStorage` (`sq_theme`) da saqlanadi.
 - Birinchi yuklashda `prefers-color-scheme` ga qaraydi.
-- `effect()` `<html>` ga `.app-dark` klassini qo'yadi.
-- **Bitta selektor ikkalasini boshqaradi:** PrimeNG (`darkModeSelector: '.app-dark'`)
-  tokenlari VA Tailwind `dark:` variantlari (`@custom-variant dark`) birga almashadi.
+- `effect()` `<html>` ga **`data-theme="light|dark"`** atributini (Aurora tokenlar uchun,
+  yagona manba) VA `.app-dark` klassini (PrimeNG toast/login uchun) parallel qo'yadi.
 
 ---
 
-## 5. Styling — Tailwind v4 + PrimeNG
+## 5. Styling — "Aurora Obsidian" + Tailwind v4 + PrimeNG
+
+**Aurora Obsidian dizayn tizimi** (`src/aurora-tokens.css`) — mint-teal + iris + coral-pink
+palitrasi, glassmorphism kartalar, neyron-to'r fon. Dark standart; `data-theme="light"`
+override qiladi. Barcha ranglar/radiuslar/soyalar CSS custom property (`--accent-a/b/c`,
+`--panel-1/2`, `--grad`, `--text/-dim/-mut`, `--r-*`) — bitta atribut butun ilovani qayta bo'yaydi.
+Ranglar RGB triplet (`--a-rgb`) sifatida saqlanadi → `rgba(var(--a-rgb), .18)` bilan alfa qo'shiladi.
+
+- **Shriftlar:** Space Grotesk (display + raqamlar), Sora (body), JetBrains Mono (label/mono).
+  `index.html`'da Google Fonts, `tailwind.css` `@theme`'da `--font-display/-sans/-mono`.
+- **Neyron fon:** `core/layout/neural-background` — 58 nuqta, distansiya bo'yicha bog'lanish,
+  tasodifiy impulslar; theme bo'yicha qayta bo'yaladi; `prefers-reduced-motion`'da statik kadr.
+  `app-shell`'da router-outlet ortida (+ radial glow + vignette).
+- **Animatsiyalar:** `sq-rise` (staggered kirish), `sq-card`/`sq-btn`/`sq-rec` hover, `sq-pulse`/
+  `sq-spin` (AI orblar/dotlar), `count-up` (KPI), chart `stroke-dashoffset` draw-in. Hammasi
+  `prefers-reduced-motion`'da o'chadi.
+- **Forecast** — custom SVG (p-chart o'rniga): smooth line, iris ishonch bandi, pulslovchi peak.
+- **Komponentlar** aurora token'larini bevosita `[style]`/inline'da ishlatadi (gradient/var uchun
+  Tailwind yetmaydi); layout/spacing Tailwind utility'da qoladi.
+
+---
+
+### PrimeNG bilan aloqasi (eski struktura)
 
 Ikkalasi **bir-birini to'ldiradi**, raqib emas:
 

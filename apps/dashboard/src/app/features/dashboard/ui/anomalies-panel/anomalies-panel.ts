@@ -1,98 +1,95 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
-import { NgClass } from '@angular/common';
-import { CardModule } from 'primeng/card';
-import { TagModule } from 'primeng/tag';
 
 import { Anomaly, AnomalySeverity, AnomalyType } from '../../models';
-
-type TagSeverity = 'warn' | 'danger';
 
 @Component({
   selector: 'app-anomalies-panel',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgClass, CardModule, TagModule],
+  host: { class: 'block' },
   template: `
-    <p-card>
-      <ng-template #title>
-        <div class="flex items-center justify-between gap-3">
-          <span class="text-[15px] font-semibold text-surface-900 dark:text-surface-0">
-            Anomaliyalar
-          </span>
-          @if (anomalies().length > 0) {
-            <p-tag severity="danger" [value]="anomalies().length + ' faol'" />
-          }
-        </div>
-      </ng-template>
+    <section
+      class="sq-card sq-rise"
+      style="animation-delay:.36s;border-radius:20px;padding:20px;background:linear-gradient(160deg,var(--panel-1),var(--panel-2));border:1px solid var(--border);box-shadow:var(--inset);"
+    >
+      <div class="mb-3.5 flex items-center justify-between">
+        <h2 style="margin:0;font-family:var(--font-display,'Space Grotesk');font-weight:600;font-size:15px;color:var(--text);">Anomaliyalar</h2>
+        @if (anomalies().length > 0) {
+          <span style="font-size:10.5px;font-weight:600;padding:3px 9px;border-radius:99px;background:rgba(var(--c-rgb),.14);color:var(--danger);">{{ anomalies().length }} faol</span>
+        }
+      </div>
 
       @if (anomalies().length === 0) {
-        <div class="flex items-center gap-2.5 py-2 text-sm text-surface-500 dark:text-surface-400">
-          <i class="pi pi-shield text-lg text-green-600"></i>
-          <span>Anomaliya yo'q — tizim barqaror.</span>
+        <div class="flex items-center gap-2.5" style="padding:6px 0;font-size:13px;color:var(--text-dim);">
+          <i class="pi pi-shield" style="font-size:17px;color:var(--ok);"></i>
+          Anomaliya yo'q — tizim barqaror.
         </div>
       }
 
       <div class="flex flex-col gap-2.5">
-        @for (a of anomalies(); track a.detectedAt + '-' + a.type + '-' + (a.counterId ?? a.serviceTypeId ?? 0)) {
-          <div class="flex items-start gap-3 rounded-xl border px-4 py-3" [ngClass]="rowClass(a.severity)">
-            <i [ngClass]="typeIcon(a.type) + ' ' + iconColor(a.severity)" class="mt-0.5 text-base"></i>
+        @for (a of anomalies(); track a.detectedAt + a.type + (a.counterId ?? a.serviceTypeId ?? 0)) {
+          <div class="sq-rec flex gap-3" [style]="rowStyle(a.severity)">
+            <div class="grid shrink-0 place-items-center" [style]="iconChip(a.severity)">
+              <i [class]="typeIcon(a.type)" style="font-size:15px;" [style.color]="color(a.severity)"></i>
+            </div>
             <div class="min-w-0 flex-1">
               <div class="flex flex-wrap items-center gap-2">
-                <span class="text-[14px] font-semibold text-surface-900 dark:text-surface-0">
-                  {{ typeLabel(a.type) }}
-                </span>
-                <p-tag [severity]="tagSeverity(a.severity)" [value]="severityLabel(a.severity)" />
-                <span class="text-[11px] text-surface-400">{{ time(a.detectedAt) }}</span>
+                <span style="font-family:var(--font-display,'Space Grotesk');font-weight:600;font-size:13.5px;color:var(--text);">{{ typeLabel(a.type) }}</span>
+                <span [style]="tag(a.severity)">{{ severityLabel(a.severity) }}</span>
+                <span style="font-size:10.5px;color:var(--text-mut);font-family:var(--font-mono,'JetBrains Mono');margin-left:auto;">{{ time(a.detectedAt) }}</span>
               </div>
-              <p class="mt-1 text-[13px] text-surface-600 dark:text-surface-300">{{ a.message }}</p>
-              <p class="mt-0.5 text-[12px] text-surface-500 dark:text-surface-400">
-                Kuzatilgan: <b>{{ a.metric }}</b> · kutilgan: {{ a.expected }}
+              <p style="margin:6px 0 0;font-size:12.5px;color:var(--text-dim);line-height:1.45;">{{ a.message }}</p>
+              <p style="margin:4px 0 0;font-size:11px;color:var(--text-mut);">
+                Kuzatilgan: <b style="color:var(--text);">{{ a.metric }}</b> · kutilgan: {{ a.expected }}
               </p>
             </div>
           </div>
         }
       </div>
-    </p-card>
+    </section>
   `,
 })
 export class AnomaliesPanel {
   readonly anomalies = input<Anomaly[]>([]);
 
-  typeIcon(type: AnomalyType): string {
-    if (type === 'slow_operator') return 'pi pi-hourglass';
-    if (type === 'backlog') return 'pi pi-inbox';
-    return 'pi pi-bolt'; // surge
+  typeIcon(t: AnomalyType): string {
+    if (t === 'slow_operator') return 'pi pi-hourglass';
+    if (t === 'backlog') return 'pi pi-inbox';
+    return 'pi pi-bolt';
   }
 
-  typeLabel(type: AnomalyType): string {
-    if (type === 'slow_operator') return 'Sekin operator';
-    if (type === 'backlog') return "Navbat to'planishi";
+  typeLabel(t: AnomalyType): string {
+    if (t === 'slow_operator') return 'Sekin operator';
+    if (t === 'backlog') return "Navbat to'planishi";
     return 'Portlash';
   }
 
-  severityLabel(severity: AnomalySeverity): string {
-    if (severity === 'warning') return 'ogohlantirish';
-    if (severity === 'serious') return 'jiddiy';
+  severityLabel(s: AnomalySeverity): string {
+    if (s === 'warning') return 'ogohlantirish';
+    if (s === 'serious') return 'jiddiy';
     return 'kritik';
   }
 
-  tagSeverity(severity: AnomalySeverity): TagSeverity {
-    return severity === 'warning' ? 'warn' : 'danger';
+  private rgb(s: AnomalySeverity): string {
+    return s === 'warning' ? '--warn-rgb' : '--c-rgb';
   }
 
-  iconColor(severity: AnomalySeverity): string {
-    if (severity === 'warning') return 'text-amber-600';
-    if (severity === 'serious') return 'text-orange-600';
-    return 'text-red-600';
+  color(s: AnomalySeverity): string {
+    return s === 'warning' ? 'var(--warn)' : 'var(--danger)';
   }
 
-  rowClass(severity: AnomalySeverity): string {
-    if (severity === 'warning') {
-      return 'border-amber-200 bg-amber-50 dark:border-amber-500/30 dark:bg-amber-500/10';
-    }
-    if (severity === 'serious') {
-      return 'border-orange-200 bg-orange-50 dark:border-orange-500/30 dark:bg-orange-500/10';
-    }
-    return 'border-red-200 bg-red-50 dark:border-red-500/30 dark:bg-red-500/10';
+  rowStyle(s: AnomalySeverity): string {
+    const rgb = this.rgb(s);
+    return `padding:13px;border-radius:14px;background:rgba(var(${rgb}),.1);border:1px solid rgba(var(${rgb}),.28);`;
+  }
+
+  iconChip(s: AnomalySeverity): string {
+    const rgb = this.rgb(s);
+    return `width:34px;height:34px;border-radius:10px;background:rgba(var(${rgb}),.12);border:1px solid rgba(var(${rgb}),.3);`;
+  }
+
+  tag(s: AnomalySeverity): string {
+    const rgb = this.rgb(s);
+    return `font-size:9.5px;font-weight:600;padding:2px 8px;border-radius:99px;background:rgba(var(${rgb}),.14);color:${this.color(s)};border:1px solid rgba(var(${rgb}),.3);`;
   }
 
   time(iso: string): string {

@@ -32,6 +32,7 @@
             ],
             "styles": [
               "src/tailwind.css",
+              "src/aurora-tokens.css",
               "node_modules/primeicons/primeicons.css",
               "src/styles.scss"
             ]
