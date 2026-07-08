@@ -1,21 +1,21 @@
 {
-  "trained_at": "2026-07-07T13:01:41.530174+00:00",
-  "cutoff": "2026-06-22 23:00:00+05:00",
+  "trained_at": "2026-07-08T15:57:35.440594+00:00",
+  "cutoff": "2026-06-24 23:00:00+05:00",
   "holdout_days": 14,
   "branch_hour": {
-    "lightgbm_mape": 13.67,
-    "baseline_mape": 18.92,
-    "lightgbm_wape": 12.6,
-    "baseline_wape": 20.09,
-    "poisson_floor_mape": 12.42,
-    "best_iteration": 191
+    "lightgbm_mape": 14.27,
+    "baseline_mape": 20.86,
+    "lightgbm_wape": 13.56,
+    "baseline_wape": 21.45,
+    "poisson_floor_mape": 12.58,
+    "best_iteration": 329
   },
   "service_hour": {
-    "lightgbm_mape": 38.71,
-    "baseline_mape": 41.29,
-    "lightgbm_wape": 25.73,
-    "baseline_wape": 31.49,
-    "poisson_floor_mape": 31.85,
-    "best_iteration": 260
+    "lightgbm_mape": 42.34,
+    "baseline_mape": 44.82,
+    "lightgbm_wape": 27.18,
+    "baseline_wape": 33.34,
+    "poisson_floor_mape": 32.1,
+    "best_iteration": 349
   }
 }
