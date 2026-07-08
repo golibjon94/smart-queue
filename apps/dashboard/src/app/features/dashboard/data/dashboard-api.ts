@@ -4,10 +4,14 @@ import { Observable, map } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
 import {
+  ActionType,
+  AnomaliesResponseDto,
+  Anomaly,
   BranchState,
   Forecast,
   ForecastResponseDto,
   Recommendation,
+  RecommendationPayload,
   RecommendationRefreshDto,
   RecommendationRefreshItemDto,
   RecommendationResponse,
@@ -66,6 +70,15 @@ export class DashboardApi {
       { status, respondedBy: 1 },
     );
   }
+
+  /** Joriy anomaliyalar (boshlang'ich yuklash — keyin SignalR push orqali keladi). */
+  getAnomalies(branchId: number): Observable<Anomaly[]> {
+    return this.http
+      .get<AnomaliesResponseDto | Anomaly[]>(`${this.base}/api/anomalies`, {
+        params: { branchId },
+      })
+      .pipe(map((r) => (Array.isArray(r) ? r : (r.anomalies ?? []))));
+  }
 }
 
 // --- pure mapping helperlari ---
@@ -108,12 +121,19 @@ function mapRow(r: RecommendationRowDto): Recommendation {
   };
 }
 
-function actionLabel(actionType: string, payload: RecommendationRowDto['actionPayload']): string {
+function actionLabel(actionType: ActionType, payload: RecommendationPayload | null | undefined): string {
   if (actionType === 'open_counter' && payload?.counter_number != null) {
     return `${payload.counter_number}-kassani oching`;
   }
   if (actionType === 'close_counter') {
     return "Kassani boshqa ishga o'tkazing";
+  }
+  if (actionType === 'route_queue') {
+    const n = payload?.to_counter_number;
+    return n != null ? `Navbatni ${n}-kassaga yo'naltiring` : "Navbatni bo'sh kassaga yo'naltiring";
+  }
+  if (actionType === 'reassign_operator') {
+    return 'Operatorni qayta tayinlang';
   }
   return actionType;
 }

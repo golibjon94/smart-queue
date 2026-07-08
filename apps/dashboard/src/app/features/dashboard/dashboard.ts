@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 
 import { DashboardStore } from './data/dashboard-store';
+import { AnomaliesPanel } from './ui/anomalies-panel/anomalies-panel';
 import { CountersPanel } from './ui/counters-panel/counters-panel';
 import { DashboardHeader } from './ui/dashboard-header/dashboard-header';
 import { ForecastChart } from './ui/forecast-chart/forecast-chart';
@@ -22,6 +23,7 @@ import {
     QueuesTable,
     ForecastChart,
     RecommendationsPanel,
+    AnomaliesPanel,
   ],
   host: { class: 'block' },
   templateUrl: './dashboard.html',

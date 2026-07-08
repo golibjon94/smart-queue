@@ -4,7 +4,12 @@ import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { TagModule } from 'primeng/tag';
 
-import { Recommendation, RecommendationResponse, RecommendationStatus } from '../../models';
+import {
+  ActionType,
+  Recommendation,
+  RecommendationResponse,
+  RecommendationStatus,
+} from '../../models';
 
 export interface RecommendationDecision {
   recId: number;
@@ -41,7 +46,7 @@ export interface RecommendationDecision {
           >
             <div class="min-w-0">
               <div class="flex items-center gap-2 text-[15px] text-surface-900 dark:text-surface-0">
-                <i class="pi pi-arrow-right text-[13px] text-primary-500"></i>
+                <i class="text-[13px] text-primary-500" [ngClass]="icon(r.actionType)"></i>
                 <strong>{{ r.action }}</strong>
                 @if (r.status === 'accepted') {
                   <p-tag severity="success" value="Qabul qilindi" />
@@ -95,5 +100,13 @@ export class RecommendationsPanel {
     return status === 'proposed'
       ? 'border-primary-200 bg-primary-50'
       : 'border-surface-200 bg-surface-100 opacity-70 dark:border-surface-700 dark:bg-surface-800';
+  }
+
+  icon(actionType: ActionType): string {
+    if (actionType === 'open_counter') return 'pi pi-plus-circle';
+    if (actionType === 'close_counter') return 'pi pi-minus-circle';
+    if (actionType === 'route_queue') return 'pi pi-directions';
+    if (actionType === 'reassign_operator') return 'pi pi-sync';
+    return 'pi pi-arrow-right';
   }
 }

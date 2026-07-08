@@ -53,6 +53,7 @@ src/
     │   │   ├── layout.service.ts #   sidebar collapse holati
     │   │   └── nav.ts            #   sidebar navigatsiya modeli (data)
     │   ├── theme/                #   dark/light mode (ThemeService)
+    │   ├── realtime/             #   SignalR client (RealtimeService) — Faza 1
     │   └── notifications/        #   toast wrapper (NotificationService)
     │
     ├── features/                 # biznes bo'limlari (har biri o'zicha mustaqil)
@@ -61,7 +62,7 @@ src/
     │   │   ├── dashboard.html
     │   │   ├── data/             #   data-access qatlami
     │   │   │   ├── dashboard-api.ts   # stateless HTTP + DTO→model mapping
-    │   │   │   └── dashboard-store.ts # signal store (holat + polling + action)
+    │   │   │   └── dashboard-store.ts # signal store (holat + real-vaqt + action)
     │   │   ├── models/           #   DTO (transport) + view-model (app) + barrel
     │   │   └── ui/               #   presentational (dumb) komponentlar
     │   │       ├── dashboard-header/
@@ -69,7 +70,8 @@ src/
     │   │       ├── counters-panel/
     │   │       ├── queues-table/
     │   │       ├── forecast-chart/
-    │   │       └── recommendations-panel/
+    │   │       ├── recommendations-panel/
+    │   │       └── anomalies-panel/   # EWMA anomaliyalar — Faza 1
     │   └── login/                #   login sahifasi
     │
     └── shared/                   # bir nechta feature ishlatadigan umumiy
@@ -144,6 +146,46 @@ Butun feature holati va logikasi shu yerda:
   komponentlariga signal qiymatlarni uzatadi, output'larni store action'lariga bog'laydi.
 - **Presentational** (`ui/*`) — holatsiz. `input()` / `output()` signal API, `OnPush`,
   inline template + Tailwind utility. Biznes logikasi yo'q.
+
+---
+
+## 3.5. Real-vaqt (Faza 1 — SignalR)
+
+Faza 1'da HTTP **polling olib tashlandi**. Ma'lumot oqimi:
+
+```
+  Boshlang'ich (bir martalik HTTP)          Real-vaqt (uzluksiz)
+  ────────────────────────────────          ─────────────────────
+  getQueueState  ─┐                          Gateway /hubs/queue (WebSocket)
+  getForecast     ├─►  DashboardStore  ◀──── queueStateUpdated
+  getRecommend.   │    (signal holat)         recommendationCreated
+  getAnomalies   ─┘                          anomalyDetected
+```
+
+- **`core/realtime/realtime.service.ts`** — `@microsoft/signalr` bilan Gateway hub'iga
+  ulanadi (`/hubs/queue`, JWT `accessTokenFactory` orqali). Hub hodisalarini
+  (camelCase payload) signal'larga o'tkazadi: `queueState`, `recommendation`, `anomaly`,
+  `connected`.
+- **Zoneless mos:** hub callback'i "zona"dan tashqarida ishlasa ham, signal write o'zi
+  change detection'ni ishga tushiradi — qo'shimcha `NgZone.run` shart emas.
+- **Qayta ulanish ikki bosqichda:** `withAutomaticReconnect` (o'rnatilgan ulanish uzilsa)
+  + `startWithRetry` (dastlabki ulanish muvaffaqiyatsiz — hub hali ko'tarilmagan bo'lsa,
+  har 15s qayta urinadi).
+- **Store bog'lash:** `DashboardStore` boshlang'ich holatni bir martalik HTTP bilan yuklaydi,
+  keyin `effect()` orqali `RealtimeService` signallariga reaksiya bildiradi (tavsiya/anomaliya
+  push'lari `untracked` ichida ro'yxatga qo'shiladi — effect o'z-o'ziga bog'lanib qolmasligi uchun).
+- **Graceful degradation:** Gateway/hub tayyor bo'lmasa (503/404/tarmoq xatosi) — boshlang'ich
+  HTTP fallback ishlaydi, "Aloqa yo'q" ko'rsatiladi, SignalR fonda qayta urinaveradi; hub
+  ko'tarilganda `queueStateUpdated` push holatni to'ldiradi.
+
+**Anomaliyalar** — `anomalyDetected` push (va boshlang'ich `GET /api/anomalies`) →
+`ui/anomalies-panel`. Turlari: `slow_operator` / `backlog` / `surge`; severity:
+`warning` / `serious` / `critical` (rang + PrimeNG Tag bilan).
+
+**`route_queue` (JIQ)** tavsiyasi — `recommendation.model.ts` `ActionType` kengaytirildi;
+`dashboard-api.ts` label mapping va `recommendations-panel` tur bo'yicha ikonka qo'shildi.
+
+> Wire-kontrakt (hub yo'li, hodisa nomlari, payload shakllari): `docs/faza1/FAZA1_UMUMIY.md`.
 
 ---
 

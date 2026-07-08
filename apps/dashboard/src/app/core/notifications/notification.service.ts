@@ -15,6 +15,10 @@ export class NotificationService {
     this.messages.add({ severity: 'info', summary, detail, life: 4000 });
   }
 
+  warn(summary: string, detail?: string): void {
+    this.messages.add({ severity: 'warn', summary, detail, life: 4500 });
+  }
+
   muted(summary: string, detail?: string): void {
     this.messages.add({ severity: 'secondary', summary, detail, life: 3000 });
   }

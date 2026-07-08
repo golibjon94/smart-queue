@@ -1,11 +1,12 @@
-import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core';
+import { DestroyRef, Injectable, computed, effect, inject, signal, untracked } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { EMPTY, catchError, switchMap, timer } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
 import { NotificationService } from '../../../core/notifications/notification.service';
+import { RealtimeService } from '../../../core/realtime/realtime.service';
 import { DashboardApi } from './dashboard-api';
 import {
+  Anomaly,
   BranchState,
   Forecast,
   Recommendation,
@@ -14,16 +15,20 @@ import {
 } from '../models';
 
 const MAX_RECS = 10;
+const MAX_ANOMALIES = 8;
 
 /**
- * Dashboard feature holati. Barcha yuklash/polling/action logikasi shu yerda —
+ * Dashboard feature holati. Barcha yuklash/real-vaqt/action logikasi shu yerda —
  * komponentlar faqat signal'larni o'qiydi va action chaqiradi.
- * Feature-scoped (Dashboard komponentining `providers` da beriladi), shuning uchun
- * store va uning polling'i route hayotiy sikliga bog'langan.
+ *
+ * Faza 1: HTTP polling olib tashlandi. Boshlang'ich holat bir martalik HTTP bilan
+ * yuklanadi, keyin barcha yangilanishlar `RealtimeService` (SignalR) push'i orqali keladi.
+ * Feature-scoped — store va uning hub ulanishi route hayotiy sikliga bog'langan.
  */
 @Injectable()
 export class DashboardStore {
   private readonly api = inject(DashboardApi);
+  private readonly realtime = inject(RealtimeService);
   private readonly notify = inject(NotificationService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly branchId = environment.branchId;
@@ -32,6 +37,7 @@ export class DashboardStore {
   private readonly _state = signal<BranchState | null>(null);
   private readonly _forecast = signal<Forecast | null>(null);
   private readonly _recs = signal<Recommendation[]>([]);
+  private readonly _anomalies = signal<Anomaly[]>([]);
   private readonly _connectionError = signal(false);
   private readonly _scenarioLoading = signal(false);
 
@@ -39,6 +45,7 @@ export class DashboardStore {
   readonly state = this._state.asReadonly();
   readonly forecast = this._forecast.asReadonly();
   readonly recommendations = this._recs.asReadonly();
+  readonly anomalies = this._anomalies.asReadonly();
   readonly connectionError = this._connectionError.asReadonly();
   readonly scenarioLoading = this._scenarioLoading.asReadonly();
 
@@ -54,14 +61,22 @@ export class DashboardStore {
   );
 
   constructor() {
-    this.startPolling();
+    // Boshlang'ich yuklash (bir martalik HTTP)
+    this.loadInitialState();
     this.loadForecast();
     this.loadRecommendations();
+    this.loadAnomalies();
+
+    // Real-vaqt ulanish + hub signallariga reaksiya
+    void this.realtime.connect(this.branchId);
+    this.bindRealtime();
+
+    this.destroyRef.onDestroy(() => void this.realtime.disconnect(this.branchId));
   }
 
   // --- actions ---
 
-  /** Demo ssenariysini almashtiradi va cho'qqi holatida yangi tavsiyalar so'raydi. */
+  /** Demo ssenariysini almashtiradi. Yangilanish/tavsiyalar hub push orqali ham keladi. */
   toggleScenario(): void {
     const next: ScenarioName = this.isPeak() ? 'normal' : 'lunch_peak';
     this._scenarioLoading.set(true);
@@ -81,7 +96,7 @@ export class DashboardStore {
         },
         error: () => {
           this._scenarioLoading.set(false);
-          this.notify.error('Ssenariyni almashtirib bo\'lmadi');
+          this.notify.error("Ssenariyni almashtirib bo'lmadi");
         },
       });
   }
@@ -103,24 +118,51 @@ export class DashboardStore {
       });
   }
 
-  // --- internal loaders ---
+  // --- real-vaqt bog'lash ---
 
-  private startPolling(): void {
-    timer(0, environment.pollIntervalMs)
-      .pipe(
-        switchMap(() =>
-          this.api.getQueueState(this.branchId).pipe(
-            catchError(() => {
-              this._connectionError.set(true);
-              return EMPTY;
-            }),
-          ),
-        ),
-        takeUntilDestroyed(this.destroyRef),
-      )
-      .subscribe((s) => {
+  private bindRealtime(): void {
+    // queue holati — push kelganda almashtiriladi
+    effect(() => {
+      const s = this.realtime.queueState();
+      if (s) {
         this._state.set(s);
         this._connectionError.set(false);
+      }
+    });
+
+    // yangi tavsiya — ro'yxatga qo'shiladi (dedup). untracked — _recs o'qishi effect
+    // bog'liqligiga aylanib ketmasligi (cheksiz sikl) uchun.
+    effect(() => {
+      const rec = this.realtime.recommendation();
+      if (rec) {
+        untracked(() => this._recs.update((old) => this.mergeRecs([rec], old)));
+      }
+    });
+
+    // yangi anomaliya — ro'yxat boshiga qo'shiladi
+    effect(() => {
+      const anomaly = this.realtime.anomaly();
+      if (anomaly) {
+        untracked(() =>
+          this._anomalies.update((old) => [anomaly, ...old].slice(0, MAX_ANOMALIES)),
+        );
+        this.notify.warn('Anomaliya aniqlandi', anomaly.message);
+      }
+    });
+  }
+
+  // --- internal loaders (bir martalik HTTP) ---
+
+  private loadInitialState(): void {
+    this.api
+      .getQueueState(this.branchId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (s) => {
+          this._state.set(s);
+          this._connectionError.set(false);
+        },
+        error: () => this._connectionError.set(true),
       });
   }
 
@@ -137,6 +179,16 @@ export class DashboardStore {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (rows) => this._recs.set(rows.slice(0, MAX_RECS)),
+        error: () => {},
+      });
+  }
+
+  private loadAnomalies(): void {
+    this.api
+      .getAnomalies(this.branchId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (list) => this._anomalies.set(list.slice(0, MAX_ANOMALIES)),
         error: () => {},
       });
   }

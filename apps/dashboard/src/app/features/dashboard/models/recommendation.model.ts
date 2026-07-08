@@ -6,6 +6,22 @@
 export type RecommendationStatus = 'proposed' | 'accepted' | 'rejected' | 'expired';
 export type RecommendationResponse = 'accepted' | 'rejected';
 
+// FAZA1_UMUMIY §7.2 — route_queue (JIQ) va reassign_operator qo'shildi.
+export type ActionType =
+  | 'open_counter'
+  | 'close_counter'
+  | 'route_queue'
+  | 'reassign_operator'
+  | (string & {});
+
+// DB row'da saqlanadigan payload (ML JSON blob — snake_case). Turlar bo'yicha ixtiyoriy.
+export interface RecommendationPayload {
+  counter_number?: number; // open_counter
+  service_type_id?: number; // route_queue
+  to_counter_id?: number; // route_queue
+  to_counter_number?: number; // route_queue
+}
+
 export interface RecommendationBenefit {
   wait_reduction_min?: number;
   wait_before_min?: number;
@@ -32,8 +48,8 @@ export interface RecommendationRefreshDto {
 // DB ro'yxati DTO (camelCase)
 export interface RecommendationRowDto {
   recId: number;
-  actionType: string;
-  actionPayload?: { counter_number?: number } | null;
+  actionType: ActionType;
+  actionPayload?: RecommendationPayload | null;
   reason: string;
   expectedBenefit?: RecommendationBenefit;
   status: RecommendationStatus;
@@ -44,7 +60,7 @@ export interface RecommendationRowDto {
 
 export interface Recommendation {
   recId: number;
-  actionType: string;
+  actionType: ActionType;
   action: string;
   reason: string;
   benefit: RecommendationBenefit;
