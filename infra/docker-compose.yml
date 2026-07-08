@@ -75,6 +75,10 @@ services:
       DEFAULT_ADMIN_USERNAME: ${DEFAULT_ADMIN_USERNAME:-admin}
       DEFAULT_ADMIN_PASSWORD: ${DEFAULT_ADMIN_PASSWORD:-Admin!2026}
       DASHBOARD_ORIGIN: http://localhost:${DASHBOARD_PORT:-4300}
+      # Faza 1 real-vaqt: SignalR Redis backplane + background pusher
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      PUSHER_INTERVAL_SECONDS: ${PUSHER_INTERVAL_SECONDS:-4}
     ports:
       - "${GATEWAY_PORT:-5080}:8080"
     depends_on:
@@ -82,6 +86,8 @@ services:
         condition: service_healthy
       python-ml:
         condition: service_started
+      redis:
+        condition: service_healthy
     restart: unless-stopped
   angular-nginx:
     build: ../apps/dashboard

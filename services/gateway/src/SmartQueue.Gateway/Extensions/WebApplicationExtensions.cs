@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Options;
 using SmartQueue.Gateway.Configuration;
 using SmartQueue.Gateway.Features.Auth;
+using SmartQueue.Gateway.Features.Realtime;
 
 namespace SmartQueue.Gateway.Extensions;
 
@@ -16,10 +17,11 @@ public static class WebApplicationExtensions
         return app;
     }
 
-    /// <summary>Barcha feature controller'larini ro'yxatga oladi (attribute routing).</summary>
+    /// <summary>Feature controller'lari + SignalR hub'ini ro'yxatga oladi.</summary>
     public static WebApplication MapGatewayEndpoints(this WebApplication app)
     {
         app.MapControllers();
+        app.MapHub<QueueHub>("/hubs/queue");
         return app;
     }
 

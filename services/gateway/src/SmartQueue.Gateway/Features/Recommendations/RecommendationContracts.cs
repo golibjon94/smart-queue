@@ -19,3 +19,16 @@ public sealed record RecommendationRow(
     DateTime? RespondedAt);
 
 public sealed record RespondResult(long RecId, string Status);
+
+/// <summary>
+/// SignalR `recommendationCreated` payload'i (camelCase) — FAZA1_UMUMIY §7.2.
+/// ML passthrough javobidan (snake_case) moslashtiriladi.
+/// </summary>
+public sealed record RecommendationDto(
+    long RecId,
+    string ActionType,          // open_counter | close_counter | route_queue | reassign_operator
+    string Action,
+    string Reason,
+    JsonElement Benefit,
+    string Status,
+    string GeneratedAt);

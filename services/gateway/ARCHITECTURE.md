@@ -71,7 +71,8 @@ SmartQueue.Gateway/
 │   ├── DatabaseOptions.cs          #   PostgreSQL ulanishi + validatsiya
 │   ├── JwtOptions.cs               #   JWT kalit/issuer/audience/muddat
 │   ├── MlServiceOptions.cs         #   ML servis URL + timeout
-│   └── AdminOptions.cs             #   Default admin login/parol
+│   ├── AdminOptions.cs             #   Default admin login/parol
+│   └── RealtimeOptions.cs          #   Pusher intervali + Redis backplane (Faza 1)
 │
 ├── Extensions/                     # Program.cs'ni yupqa saqlash
 │   ├── ServiceCollectionExtensions.cs   #  AddGateway* (DI ro'yxati)
@@ -83,8 +84,8 @@ SmartQueue.Gateway/
 │
 ├── Infrastructure/
 │   └── Ml/
-│       ├── MlClient.cs             #   Typed HttpClient (ML proxy)
-│       └── MlContracts.cs          #   snake_case wire-kontraktlar
+│       ├── MlClient.cs             #   Typed HttpClient (forecast/rec passthrough, anomaly typed)
+│       └── MlContracts.cs          #   snake_case wire-kontraktlar (services/counters/anomaly)
 │
 └── Features/                       # Vertical slice'lar
     ├── Auth/
@@ -102,9 +103,19 @@ SmartQueue.Gateway/
     │   └── ForecastController.cs    #   GET /api/forecast (ML proxy)
     ├── Recommendations/
     │   ├── RecommendationsController.cs  # refresh / list / respond
-    │   ├── RecommendationService.cs      # orkestratsiya
+    │   ├── RecommendationService.cs      # orkestratsiya (JIQ counters + push)
     │   ├── RecommendationRepository.cs   # recommendations jadvali (SQL)
-    │   └── RecommendationContracts.cs    # RespondRequest, RecommendationRow, ...
+    │   └── RecommendationContracts.cs    # RespondRequest, RecommendationRow, RecommendationDto
+    ├── Realtime/                    # Faza 1 — SignalR real-vaqt
+    │   ├── QueueHub.cs              #   /hubs/queue (JoinBranch/LeaveBranch)
+    │   ├── RealtimeNotifier.cs      #   IRealtimeNotifier — push abstraktsiyasi
+    │   ├── BranchRegistry.cs        #   faol filial obunachilarini kuzatadi
+    │   ├── QueueStatePusher.cs      #   BackgroundService — davriy push
+    │   └── RealtimeEvents.cs        #   hodisa nomlari (konstanta)
+    ├── Anomalies/                   # Faza 1 — anomaliya proxy
+    │   ├── AnomaliesController.cs   #   GET /api/anomalies
+    │   ├── AnomalyService.cs        #   ML proxy + snake→camel + push
+    │   └── AnomalyContracts.cs      #   Anomaly (camelCase)
     └── Health/
         └── HealthController.cs      #   GET /health (ochiq)
 ```
@@ -167,9 +178,11 @@ Barcha javoblar **camelCase JSON**. `[Authorize]` ustunidagi ✔ — JWT talab q
 | `GET`  | `/api/queue-state?branchId=` | ✔ | Filial navbat holati |
 | `POST` | `/api/demo/scenario` | ✔ | Ssenariy almashtirish (`normal` \| `lunch_peak`) |
 | `GET`  | `/api/forecast?branchId=&hours=` | ✔ | Bashorat (ML passthrough) |
-| `POST` | `/api/recommendations/refresh?branchId=` | ✔ | Yangi tavsiya hisoblash (ML) |
+| `POST` | `/api/recommendations/refresh?branchId=` | ✔ | Yangi tavsiya (JIQ) hisoblash (ML) |
 | `GET`  | `/api/recommendations?branchId=&status=` | ✔ | Tavsiyalar ro'yxati (DB) |
 | `POST` | `/api/recommendations/{recId}/respond` | ✔ | Qabul/rad (audit izi) |
+| `GET`  | `/api/anomalies?branchId=&lookbackHours=` | ✔ | Anomaliyalar (ML proxy) — *Faza 1* |
+| `WS`   | `/hubs/queue` | ✔ (query token) | SignalR real-vaqt push — *Faza 1* |
 
 > **Muhim:** refactoring API kontraktini o'zgartirmagan — Angular hech qanday
 > moslashuvsiz ishlaydi.
@@ -193,8 +206,10 @@ riskini `int.TryParse` bilan yo'q qiladi.
 | Repozitoriylar (`User`, `ReferenceData`, `Recommendation`) | Singleton | Holatsiz, faqat `NpgsqlDataSource`'ga bog'liq |
 | `JwtTokenGenerator` | Singleton | Holatsiz |
 | `DemoStateService` | Singleton | Xotirada jonli holat saqlaydi |
-| `AuthService`, `RecommendationService` | Scoped | Har so'rov konteksti |
+| `AuthService`, `RecommendationService`, `AnomalyService` | Scoped | Har so'rov konteksti |
 | `MlClient` | Transient (`AddHttpClient`) | `HttpClientFactory` boshqaradi |
+| `BranchRegistry`, `IRealtimeNotifier` | Singleton | Real-vaqt holat/push (Faza 1) |
+| `QueueStatePusher` | Hosted (Singleton) | `BackgroundService` — davriy push (Faza 1) |
 
 > **Captive dependency yo'q:** singleton `DemoStateService` faqat singleton
 > `ReferenceDataRepository`'ga bog'liq — DI grafi startup'da tekshiriladi.
@@ -278,11 +293,55 @@ Konfiguratsiya `.env` / docker-compose orqali (flat kalitlar):
 
 ---
 
-## 11. Keyingi qadamlar
+## 11. Faza 1 — Real-vaqt (SignalR)
 
-- [ ] **Birlik testlar** (`services/gateway/tests/`) — controller/service/repository.
-- [ ] **SignalR real-vaqt push** (`Features/Realtime/`) — dashboard'ga jonli holat/tavsiya.
-- [ ] **Redis** — SignalR backplane + ML javoblarini keshlash.
+Faza 1 dashboard pollingni **jonli WebSocket push** bilan almashtiradi va JIQ
+marshrutlash + EWMA anomaliyalarni qo'shadi. Servislararo kontrakt:
+[`../../docs/faza1/FAZA1_UMUMIY.md`](../../docs/faza1/FAZA1_UMUMIY.md).
+
+### 11.1 SignalR Hub (`/hubs/queue`)
+- Client→Server: `JoinBranch(int)`, `LeaveBranch(int)` — `branch-{id}` guruhlari.
+- Server→Client (camelCase): `queueStateUpdated` (`BranchState`), `recommendationCreated`
+  (`RecommendationDto`), `anomalyDetected` (`Anomaly`).
+- **JWT-over-WebSocket:** browser WS header qo'ya olmaydi, shuning uchun token
+  `?access_token=` query'dan o'qiladi (`JwtBearerEvents.OnMessageReceived`, `/hubs` yo'li uchun).
+- **Redis backplane:** `REDIS_HOST` sozlangan bo'lsagina yoqiladi (`AddStackExchangeRedis`,
+  `abortConnect=false`) — bir nechta instansiyada masshtablash. Aks holda in-memory.
+- SignalR JSON protokoli **camelCase**ga sozlangan (`AddJsonProtocol`).
+
+### 11.2 Background pusher (`QueueStatePusher`)
+- `BackgroundService` + `PeriodicTimer` (default 4s, `PUSHER_INTERVAL_SECONDS`).
+- `BranchRegistry` faol obunachili filiallarni kuzatadi — pusher faqat shularga yuboradi.
+- Har filial xatosi alohida ushlanadi (bittasi butun tsiklni to'xtatmaydi).
+- Ssenariy o'zgarganda `QueueController` darhol `queueStateUpdated` push qiladi.
+
+### 11.3 Anomaliya proxy (`/api/anomalies`)
+- ML `POST /anomalies`'ga proxy; snake_case → camelCase moslashtiradi (typed, passthrough emas).
+- Aniqlangan anomaliyalar `anomalyDetected` orqali SignalR'ga ham push qilinadi.
+
+### 11.4 JIQ / `route_queue`
+- `RefreshAsync` endi ML'ga **`counters`** (kassa-daraja holati: `status`, `supported_service_types`)
+  yuboradi — ML shu asosda `route_queue` (JIQ) tavsiyalarini beradi.
+- Tavsiyalar HTTP javobida passthrough (snake_case, frontend mapladi) + SignalR'da camelCase push.
+
+### 11.5 Push oqimi (decoupling)
+Feature'lar SignalR'ga to'g'ridan-to'g'ri bog'lanmaydi — hammasi `IRealtimeNotifier`
+orqali. Bu Realtime slice'ni yagona push nuqtasi qiladi.
+
+```
+QueueStatePusher ─┐
+QueueController   ─┼─► IRealtimeNotifier ─► IHubContext<QueueHub> ─► branch-{id} guruhi
+AnomalyService    ─┤
+RecommendationService ─┘
+```
+
+---
+
+## 12. Keyingi qadamlar
+
+- [ ] **Birlik testlar** (`services/gateway/tests/`) — controller/service/repository/hub.
+- [x] **SignalR real-vaqt push** (`Features/Realtime/`) — jonli holat/tavsiya/anomaliya *(Faza 1)*.
+- [x] **Redis backplane** — SignalR masshtablash *(Faza 1; kesh keyingi bosqichda)*.
 - [ ] **OpenAPI/Swagger** — `AddOpenApi()` + `MapOpenApi()` (dev'da API hujjati).
 - [ ] Rate limiting va HTTPS majburiy (prod).
 ```

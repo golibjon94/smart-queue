@@ -35,6 +35,19 @@ public sealed class MlClient(HttpClient http)
         MlRecommendationRequest req, CancellationToken ct = default) =>
         PostPassthroughAsync("/recommendations", req, ct);
 
+    /// <summary>
+    /// Anomaliyalar — passthrough emas, typed: Gateway snake_case → camelCase
+    /// moslashtiradi (FAZA1_UMUMIY §7.3).
+    /// </summary>
+    public async Task<MlAnomalyResponse?> AnomaliesAsync(
+        int branchId, int lookbackHours, CancellationToken ct = default)
+    {
+        using var resp = await http.PostAsJsonAsync(
+            "/anomalies", new MlAnomalyRequest(branchId, lookbackHours), JsonOpts, ct);
+        resp.EnsureSuccessStatusCode();
+        return await resp.Content.ReadFromJsonAsync<MlAnomalyResponse>(JsonOpts, ct);
+    }
+
     private async Task<MlProxyResult> PostPassthroughAsync<TRequest>(
         string path, TRequest body, CancellationToken ct)
     {

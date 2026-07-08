@@ -6,6 +6,7 @@ builder.Services
     .AddGatewayConfiguration(builder.Configuration)
     .AddGatewayDatabase()
     .AddGatewayServices()
+    .AddGatewayRealtime(builder.Configuration)
     .AddGatewayAuthentication()
     .AddGatewayCors(builder.Configuration)
     .AddGatewayErrorHandling();
