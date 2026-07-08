@@ -44,6 +44,10 @@ export const appConfig: ApplicationConfig = {
 
     MessageService,
     providePrimeNG({
+      // Barcha overlay'lar (menu, dropdown, popover...) body'ga append qilinadi —
+      // aks holda sticky topbar ichida inline render bo'lib, gorizontal overflow
+      // hosil qilib content'ni siljitadi.
+      overlayAppendTo: 'body',
       theme: {
         preset: Aura,
         options: {
