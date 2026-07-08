@@ -203,6 +203,16 @@ Faza 0 scope'iga kirmagan (ROADMAP bo'yicha):
 
 ---
 
+## 11.1 Faza 1 bajarish paketi (tayyor)
+
+Faza 1'ni uch alohida chatda (PyCharm/ML, Rider/Gateway, WebStorm/Frontend) sifatli
+bajarish uchun tayyor prompt va kontrakt: **[`faza1/`](faza1/)** papkasi.
+- [`faza1/FAZA1_UMUMIY.md`](faza1/FAZA1_UMUMIY.md) — servislararo kontrakt (avval o'qiladi)
+- `faza1/FAZA1_{ML,GATEWAY,FRONTEND}_PROMPT.md` — har IDE/chat uchun nusxalanadigan prompt
+- [`faza1/README.md`](faza1/README.md) — qanday ishlatish + tartib
+
+---
+
 ## 12. Keyingi qadamlar uchun aniq TODO'lar
 
 Har qism o'z ARCHITECTURE.md oxirida batafsil ro'yxatga ega. Eng ustuvorlari:
