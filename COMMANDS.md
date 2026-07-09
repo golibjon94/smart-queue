@@ -9,7 +9,7 @@
 
 | Buyruq | Vazifa |
 |--------|--------|
-| `.\scripts\up.ps1` | Loyihani ishga tushiradi (5 servis) |
+| `.\scripts\up.ps1` | Ishga tushiradi + **bo'sh bazani avtomatik tiklaydi** (migratsiya + admin + demo) |
 | `.\scripts\up.ps1 -Build` | **Kod o'zgargandan keyin** — qayta qurib ishga tushiradi |
 | `.\scripts\down.ps1` | To'xtatadi (ma'lumot saqlanadi) |
 | `.\scripts\down.ps1 -Wipe` | To'xtatadi va **ma'lumotni o'chiradi** (toza boshlash) |
@@ -79,15 +79,16 @@ docker compose -f infra/docker-compose.yml restart dotnet-gateway
 ```
 
 **Toza DB'dan noldan (`down -Wipe` dan keyin):**
+`up.ps1` bo'sh bazani **avtomatik** tiklaydi (migratsiya + admin + demo ma'lumot):
 ```powershell
-.\scripts\up.ps1                # DB bo'sh ko'tariladi
-.\scripts\migrate.ps1 -Seed     # sxema + referens ma'lumot
-# Model host'da (agar models/latest.joblib yo'q bo'lsa):
-cd services\ml
-.\.venv\Scripts\python -m forecasting.train
-cd ..\..
-.\scripts\seed-demo.ps1         # sintetik data + bashorat + anomaliya
+.\scripts\up.ps1
 ```
+> Faqat model yo'q bo'lsa (toza klon — `services\ml\models\latest.joblib` yo'q) avval host'da
+> o'qiting, keyin qayta ko'taring:
+> ```powershell
+> cd services\ml ; .\.venv\Scripts\python -m forecasting.train ; cd ..\..
+> .\scripts\up.ps1
+> ```
 
 **DB'ga to'g'ridan-to'g'ri kirish:**
 ```powershell
