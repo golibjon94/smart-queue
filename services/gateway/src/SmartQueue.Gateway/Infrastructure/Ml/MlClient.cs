@@ -48,6 +48,33 @@ public sealed class MlClient(HttpClient http)
         return await resp.Content.ReadFromJsonAsync<MlAnomalyResponse>(JsonOpts, ct);
     }
 
+    /// <summary>What-if simulyatsiya (§4). ML yetib bo'lmasa istisno tashlaydi.</summary>
+    public async Task<MlSimulateResponse?> SimulateAsync(
+        MlSimulateRequest req, CancellationToken ct = default)
+    {
+        using var resp = await http.PostAsJsonAsync("/simulate", req, JsonOpts, ct);
+        resp.EnsureSuccessStatusCode();
+        return await resp.Content.ReadFromJsonAsync<MlSimulateResponse>(JsonOpts, ct);
+    }
+
+    /// <summary>QR virtual navbat ETA (§5.5, forecast bilan tuzatilgan).</summary>
+    public async Task<MlEtaResponse?> EtaAsync(MlEtaRequest req, CancellationToken ct = default)
+    {
+        using var resp = await http.PostAsJsonAsync("/eta", req, JsonOpts, ct);
+        resp.EnsureSuccessStatusCode();
+        return await resp.Content.ReadFromJsonAsync<MlEtaResponse>(JsonOpts, ct);
+    }
+
+    /// <summary>O'zbekcha izohlarni sentiment/mavzu bo'yicha tasniflaydi (§6.2).</summary>
+    public async Task<MlClassifyResponse?> ClassifyFeedbackAsync(
+        IReadOnlyList<string> comments, CancellationToken ct = default)
+    {
+        using var resp = await http.PostAsJsonAsync(
+            "/classify-feedback", new MlClassifyRequest(comments), JsonOpts, ct);
+        resp.EnsureSuccessStatusCode();
+        return await resp.Content.ReadFromJsonAsync<MlClassifyResponse>(JsonOpts, ct);
+    }
+
     private async Task<MlProxyResult> PostPassthroughAsync<TRequest>(
         string path, TRequest body, CancellationToken ct)
     {

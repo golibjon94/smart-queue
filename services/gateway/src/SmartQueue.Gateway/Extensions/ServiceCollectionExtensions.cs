@@ -8,9 +8,11 @@ using SmartQueue.Gateway.Common;
 using SmartQueue.Gateway.Configuration;
 using SmartQueue.Gateway.Features.Anomalies;
 using SmartQueue.Gateway.Features.Auth;
+using SmartQueue.Gateway.Features.Feedback;
 using SmartQueue.Gateway.Features.Queue;
 using SmartQueue.Gateway.Features.Realtime;
 using SmartQueue.Gateway.Features.Recommendations;
+using SmartQueue.Gateway.Features.VirtualQueue;
 using SmartQueue.Gateway.Infrastructure.Ml;
 
 namespace SmartQueue.Gateway.Extensions;
@@ -80,6 +82,8 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<UserRepository>();
         services.AddSingleton<ReferenceDataRepository>();
         services.AddSingleton<RecommendationRepository>();
+        services.AddSingleton<VqRepository>();
+        services.AddSingleton<FeedbackRepository>();
 
         return services;
     }
@@ -94,6 +98,12 @@ public static class ServiceCollectionExtensions
 
         services.AddSingleton<DemoStateService>();
         services.AddScoped<RecommendationService>();
+
+        // Faza 2: virtual navbat (scoped — MlClient'ga bog'liq) + abuse himoyasi (singleton).
+        services.AddScoped<VqService>();
+        services.AddSingleton<VqRateLimiter>();
+        // Faza 2: sentiment-feedback (scoped — MlClient'ga bog'liq).
+        services.AddScoped<FeedbackService>();
 
         services.AddHttpClient<MlClient>((sp, http) =>
         {
@@ -154,8 +164,17 @@ public static class ServiceCollectionExtensions
         this IServiceCollection services, IConfiguration cfg)
     {
         var origin = cfg["DASHBOARD_ORIGIN"] ?? "http://localhost:4300";
-        services.AddCors(o => o.AddDefaultPolicy(policy =>
-            policy.WithOrigins(origin).AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
+        services.AddCors(o =>
+        {
+            // Standart: dashboard origin'i (SignalR uchun credentials bilan).
+            o.AddDefaultPolicy(policy =>
+                policy.WithOrigins(origin).AllowAnyHeader().AllowAnyMethod().AllowCredentials());
+
+            // Faza 2: public mijoz endpointlari (/api/vq/*, POST /api/feedback) boshqa
+            // origin'dan (QR veb-sahifa) kelishi mumkin — auth/credentials talab qilmaydi.
+            o.AddPolicy("public", policy =>
+                policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
+        });
         return services;
     }
 
@@ -167,6 +186,8 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IRealtimeNotifier, RealtimeNotifier>();
         services.AddScoped<AnomalyService>();
         services.AddHostedService<QueueStatePusher>();
+        // Faza 2: virtual navbat pozitsiyalarini davriy push qiladi (§5.4).
+        services.AddHostedService<VqPositionPusher>();
 
         var signalr = services.AddSignalR();
         // Frontend camelCase kutadi (FAZA1_UMUMIY §7).
