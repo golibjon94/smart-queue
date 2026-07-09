@@ -3,17 +3,16 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 
-import { NeuralBackground } from '../../core/layout/neural-background/neural-background';
 import { ThemeSwitcher } from '../../core/theme/theme-switcher/theme-switcher';
 import { AuthService } from '../../core/auth/auth.service';
 
 @Component({
   selector: 'app-login',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, NeuralBackground, ThemeSwitcher],
+  imports: [FormsModule, ThemeSwitcher],
   host: {
     class: 'relative block h-screen overflow-hidden',
-    style: 'background: var(--bg-radials), var(--bg); color: var(--text);',
+    style: 'background: var(--bg); color: var(--text);',
   },
   templateUrl: './login.html',
 })

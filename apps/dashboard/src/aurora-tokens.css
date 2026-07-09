@@ -231,9 +231,137 @@
   background: rgba(255, 255, 255, 0.045);
 }
 
+/* ---- Login "AI Spectrum" — atom + spiral (yorqin, aylanadigan) ---- */
+/* position bermaymiz — joylashuvni ishlatgan joydagi `absolute` klass beradi
+   (aks holda layer'siz .sq-atom Tailwind .absolute'ni override qilib oqimда qoladi). */
+
+/* orqa yumshoq aura */
+.sq-atom__halo {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 120deg,
+    rgba(var(--d-rgb), 0), rgba(var(--a-rgb), 0.5), rgba(var(--b-rgb), 0.5),
+    rgba(var(--c-rgb), 0.5), rgba(var(--warn-rgb), 0.4), rgba(var(--d-rgb), 0)
+  );
+  filter: blur(48px);
+  animation: sq-spin-rev 32s linear infinite;
+}
+
+/* spiral spektral g'ildirak — yorqin, aylanuvchi */
+.sq-atom__wheel {
+  position: absolute;
+  inset: 15%;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    rgba(var(--d-rgb), 0), rgba(var(--d-rgb), 0.7) 12%, rgba(var(--a-rgb), 0.6) 32%,
+    rgba(var(--b-rgb), 0.65) 54%, rgba(var(--c-rgb), 0.65) 74%, rgba(var(--warn-rgb), 0.5) 90%,
+    rgba(var(--d-rgb), 0)
+  );
+  filter: blur(15px);
+  animation: sq-spin 16s linear infinite;
+}
+
+/* nozik statik halqalar (chuqurlik uchun) */
+.sq-atom__ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(var(--d-rgb), 0.18);
+  box-shadow: inset 0 0 40px rgba(var(--d-rgb), 0.1);
+}
+
+/* atom elektron orbitalari — qiya elliptik (squash+tilt) */
+.sq-orbit {
+  position: absolute;
+  inset: 15%;
+  border-radius: 50%;
+  transform: rotate(var(--tilt, 0deg)) scaleY(0.42);
+}
+.sq-orbit::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1.6px solid rgba(var(--orbc), 0.6);
+  box-shadow: 0 0 22px rgba(var(--orbc), 0.35);
+}
+.sq-orbit__spin {
+  position: absolute;
+  inset: 0;
+  animation: sq-spin var(--dur, 8s) linear infinite;
+}
+.sq-orbit--rev .sq-orbit__spin { animation-name: sq-spin-rev; }
+.sq-electron {
+  position: absolute;
+  top: -5.5px;
+  left: calc(50% - 5.5px);
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: rgb(var(--orbc));
+  box-shadow: 0 0 14px rgb(var(--orbc)), 0 0 30px rgba(var(--orbc), 0.9);
+  transform: scaleY(2.38); /* .42 squash'ni kompensatsiya — dumaloq ko'rinadi */
+}
+
+/* yorqin pulslovchi yadro */
+.sq-atom__core {
+  position: absolute;
+  inset: 43%;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff, rgb(var(--d-rgb)) 52%, transparent 72%);
+  box-shadow: 0 0 36px rgb(var(--d-rgb)), 0 0 78px rgba(var(--d-rgb), 0.6);
+  animation: sq-pulse 2.4s ease-in-out infinite;
+}
+
+/* ---- Sidebar yumshoq yig'ilishi/ochilishi ---- */
+.sq-side {
+  transition: width 0.42s cubic-bezier(0.4, 0, 0.2, 1),
+    padding 0.42s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+.sq-side-row {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  transition: gap 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.sq-side.is-collapsed .sq-side-row {
+  gap: 0;
+  justify-content: center;
+}
+.sq-side-label {
+  overflow: hidden;
+  white-space: nowrap;
+  max-width: 200px;
+  opacity: 1;
+  transition: opacity 0.2s ease, max-width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.sq-side.is-collapsed .sq-side-label {
+  max-width: 0;
+  opacity: 0;
+}
+.sq-side-eyebrow {
+  overflow: hidden;
+  white-space: nowrap;
+  max-height: 22px;
+  opacity: 1;
+  transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease,
+    padding 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.sq-side.is-collapsed .sq-side-eyebrow {
+  max-height: 0;
+  opacity: 0;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
 /* ---- respect reduced motion ---- */
 @media (prefers-reduced-motion: reduce) {
   .sq-rise { opacity: 1; animation: none; }
   .sq-card, .sq-btn, .sq-mini, .sq-rec, .sq-navitem { transition: none; }
+  .sq-side, .sq-side-row, .sq-side-label { transition: none; }
   *[style*='sq-spin'], *[style*='sq-pulse'], *[style*='sq-pulsedot'] { animation: none !important; }
+  .sq-atom__halo, .sq-atom__wheel, .sq-orbit__spin, .sq-atom__core { animation: none !important; }
 }

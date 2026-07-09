@@ -1,9 +1,3 @@
-<app-neural-background />
-<div
-  class="pointer-events-none fixed inset-0"
-  style="z-index:0;background:radial-gradient(circle at 50% 50%, transparent 52%, var(--vignette) 100%);"
-></div>
-
 <div class="fixed" style="z-index:10;top:20px;right:22px;">
   <app-theme-switcher />
 </div>
@@ -115,21 +109,25 @@
   <!-- RIGHT — brand panel -->
   <div
     class="relative flex flex-col justify-center overflow-hidden max-md:hidden"
-    style="padding:56px;border-left:1px solid var(--border);background:linear-gradient(150deg,rgba(var(--a-rgb),.16),rgba(var(--b-rgb),.10) 55%,rgba(var(--c-rgb),.12)),var(--brand-base);"
+    style="padding:56px;border-left:1px solid var(--border);background:var(--brand-base);"
   >
-    <div class="absolute" style="top:-90px;right:-90px;width:360px;height:360px;border-radius:50%;background:radial-gradient(circle,rgba(var(--d-rgb),.22),transparent 68%);"></div>
-    <div class="absolute" style="bottom:-110px;left:-90px;width:380px;height:380px;border-radius:50%;background:radial-gradient(circle,rgba(var(--c-rgb),.18),transparent 68%);"></div>
-
-    <!-- AI Spectrum — dekorativ, kontent ortida (faqat CSS) -->
+    <!-- AI Spectrum — atom + spiral (faqat CSS, kontent ortida) -->
     <div
-      class="pointer-events-none absolute"
-      style="top:50%;right:-70px;transform:translateY(-50%);width:560px;height:560px;opacity:.75;"
+      class="sq-atom pointer-events-none absolute"
+      style="top:50%;right:-50px;transform:translateY(-50%);width:620px;height:620px;opacity:1;"
     >
-      <div class="absolute" style="inset:0;border-radius:50%;background:conic-gradient(from 0deg, rgba(var(--d-rgb),0), rgba(var(--d-rgb),.55), rgba(var(--a-rgb),.55), rgba(var(--b-rgb),.55), rgba(var(--c-rgb),.55), rgba(var(--warn-rgb),.4), rgba(var(--d-rgb),0));filter:blur(34px);animation:sq-spin 30s linear infinite;"></div>
-      <div class="absolute" style="inset:90px;border-radius:50%;background:conic-gradient(from 140deg, transparent, rgba(var(--a-rgb),.42) 30%, transparent 62%);filter:blur(10px);animation:sq-spin-rev 22s linear infinite;"></div>
-      <div class="absolute" style="inset:150px;border-radius:50%;border:1px solid rgba(var(--d-rgb),.22);box-shadow:inset 0 0 44px rgba(var(--d-rgb),.16);animation:sq-spin 40s linear infinite;"></div>
-      <div class="absolute" style="inset:212px;border-radius:50%;border:1px dashed rgba(var(--b-rgb),.22);animation:sq-spin-rev 34s linear infinite;"></div>
-      <div class="absolute" style="inset:256px;border-radius:50%;background:radial-gradient(circle, rgba(var(--d-rgb),.5), transparent 70%);filter:blur(6px);animation:sq-pulse 3s ease-in-out infinite;"></div>
+      <div class="sq-atom__ring" style="inset:16%;"></div>
+      <div class="sq-atom__ring" style="inset:30%;"></div>
+      <div class="sq-orbit" style="--tilt:0deg;--orbc:var(--d-rgb);--dur:6s;">
+        <div class="sq-orbit__spin"><span class="sq-electron"></span></div>
+      </div>
+      <div class="sq-orbit sq-orbit--rev" style="--tilt:60deg;--orbc:var(--a-rgb);--dur:8s;">
+        <div class="sq-orbit__spin"><span class="sq-electron"></span></div>
+      </div>
+      <div class="sq-orbit" style="--tilt:120deg;--orbc:var(--c-rgb);--dur:10s;">
+        <div class="sq-orbit__spin"><span class="sq-electron"></span></div>
+      </div>
+      <div class="sq-atom__core"></div>
     </div>
 
     <div class="relative" style="max-width:440px;z-index:2;">
