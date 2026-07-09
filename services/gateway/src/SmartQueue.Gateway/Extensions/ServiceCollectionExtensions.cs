@@ -61,11 +61,6 @@ public static class ServiceCollectionExtensions
             {
                 if (int.TryParse(cfg["PUSHER_INTERVAL_SECONDS"], out var seconds))
                     o.PusherIntervalSeconds = seconds;
-
-                // REDIS_HOST sozlangan bo'lsagina backplane yoqiladi (aks holda in-memory).
-                var redisHost = cfg["REDIS_HOST"];
-                if (!string.IsNullOrWhiteSpace(redisHost))
-                    o.RedisConnection = $"{redisHost}:{cfg["REDIS_PORT"] ?? "6379"},abortConnect=false";
             })
             .ValidateDataAnnotations().ValidateOnStart();
 

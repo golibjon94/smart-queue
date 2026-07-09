@@ -24,7 +24,6 @@ def test_saturated_system():
 
 
 def test_more_counters_less_wait():
-    lam, mu = 10.0 / 60.0, 1.0 / 300.0 * 2  # istalgan barqaror holat
     lam, mu = 0.02, 0.01
     w3, w4 = avg_wait_sec(lam, mu, 3), avg_wait_sec(lam, mu, 4)
     assert w4 < w3

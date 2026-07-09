@@ -11,8 +11,6 @@ public sealed class RealtimeOptions
     [Range(1, 60)]
     public int PusherIntervalSeconds { get; set; } = 4;
 
-    /// <summary>Bo'sh bo'lmasa — SignalR Redis backplane yoqiladi (aks holda in-memory).</summary>
-    public string? RedisConnection { get; set; }
-
-    public bool RedisEnabled => !string.IsNullOrWhiteSpace(RedisConnection);
+    // Redis backplane REDIS_HOST env orqali AddGatewayRealtime'da to'g'ridan-to'g'ri
+    // sozlanadi (registratsiya vaqtida ulanish satri kerak bo'lgani uchun).
 }

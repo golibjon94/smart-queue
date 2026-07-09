@@ -35,13 +35,11 @@ def recursive_forecast(booster, history: pd.DataFrame, horizon_hours: int) -> pd
             })
             w24 = series.loc[t - pd.Timedelta(hours=24): t - pd.Timedelta(hours=1)]
             w168 = series.loc[t - pd.Timedelta(hours=168): t - pd.Timedelta(hours=1)]
-            X["lag_1"] = series.iloc[-1].values
             X["lag_24"] = series.loc[t - pd.Timedelta(hours=24)].values \
                 if (t - pd.Timedelta(hours=24)) in series.index else np.nan
             X["lag_168"] = series.loc[t - pd.Timedelta(hours=168)].values \
                 if (t - pd.Timedelta(hours=168)) in series.index else np.nan
             X["roll_mean_24"] = w24.mean().values
-            X["roll_std_24"] = w24.std().values
             X["roll_mean_168"] = w168.mean().values
             weekly = [series.loc[t - pd.Timedelta(hours=168 * k)].values
                       for k in (1, 2, 3, 4)

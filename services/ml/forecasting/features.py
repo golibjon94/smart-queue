@@ -70,14 +70,12 @@ def add_calendar(grid: pd.DataFrame) -> pd.DataFrame:
 def add_lags(grid: pd.DataFrame) -> pd.DataFrame:
     keys = ["branch_id", "service_type_id"]
     g = grid.groupby(keys)["arrivals"]
-    grid["lag_1"] = g.shift(1)
     grid["lag_24"] = g.shift(24)
     grid["lag_168"] = g.shift(168)
 
     shifted = g.shift(1)
     grp = shifted.groupby([grid[k] for k in keys])
     grid["roll_mean_24"] = grp.transform(lambda s: s.rolling(24, min_periods=24).mean())
-    grid["roll_std_24"] = grp.transform(lambda s: s.rolling(24, min_periods=24).std())
     grid["roll_mean_168"] = grp.transform(lambda s: s.rolling(168, min_periods=168).mean())
 
     # O'tgan 4 haftadagi bir xil (hafta kuni, soat) o'rtachasi — kunlik

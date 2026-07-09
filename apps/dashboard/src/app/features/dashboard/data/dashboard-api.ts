@@ -65,9 +65,10 @@ export class DashboardApi {
   }
 
   respond(recId: number, status: RecommendationResponse): Observable<void> {
+    // respondedBy yuborilmaydi — Gateway audit uchun foydalanuvchini JWT claim'idan oladi.
     return this.http.post<void>(
       `${this.base}/api/recommendations/${recId}/respond`,
-      { status, respondedBy: 1 },
+      { status },
     );
   }
 

@@ -10,6 +10,7 @@ ustida EWMA nazorat chartasi. slow_operator: queue_events'dagi xizmat vaqtlari u
 """
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
 from datetime import datetime
 from zoneinfo import ZoneInfo
@@ -32,6 +33,7 @@ from .config import (
 )
 
 TZ = ZoneInfo(TIMEZONE)
+logger = logging.getLogger(__name__)
 
 
 # --------------------------------------------------------------------------- #
@@ -176,6 +178,14 @@ def _detect_arrival_anomalies(conn, branch_id: int, lookback_hours: int) -> list
         for (bucket, arr, wait) in actual_rows if bucket in forecast
     ]
     if len(series) < EWMA_MIN_POINTS:
+        # surge/backlog qoldiq = actual − forecast. Agar forecasts jadvalida o'tgan
+        # soatlar bo'lmasa (predict `--overlap-hours`siz ishlagan), kesishuv bo'sh
+        # bo'ladi va surge/backlog hech qachon aniqlanmaydi — buni yaqqol log qilamiz.
+        logger.info(
+            "anomaliya (filial %s): kelish qoldig'i uchun forecast↔actual kesishuvi "
+            "yetarli emas (%d nuqta). predict `--overlap-hours` bilan ishlaganmi?",
+            branch_id, len(series),
+        )
         return []
 
     residuals = [arr - fc for (_, arr, _, fc) in series]

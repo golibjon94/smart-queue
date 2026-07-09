@@ -17,6 +17,11 @@ import {
 const MAX_RECS = 10;
 const MAX_ANOMALIES = 8;
 
+/** Anomaliya kompozit kaliti — bir xil (tur + kassa + xizmat) anomaliyani dedup qilish uchun. */
+function anomalyKey(a: Anomaly): string {
+  return `${a.type}:${a.counterId ?? ''}:${a.serviceTypeId ?? ''}`;
+}
+
 /**
  * Dashboard feature holati. Barcha yuklash/real-vaqt/action logikasi shu yerda —
  * komponentlar faqat signal'larni o'qiydi va action chaqiradi.
@@ -32,6 +37,9 @@ export class DashboardStore {
   private readonly notify = inject(NotificationService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly branchId = environment.branchId;
+
+  // Bir marta SignalR ulanganini kuzatadi (uzilishni faqat shundan keyin xato deb belgilash uchun).
+  private _hasConnected = false;
 
   // --- xom holat (writable) ---
   private readonly _state = signal<BranchState | null>(null);
@@ -139,15 +147,35 @@ export class DashboardStore {
       }
     });
 
-    // yangi anomaliya — ro'yxat boshiga qo'shiladi
+    // yangi anomaliya — kompozit kalit bo'yicha dedup (bir xil anomaliya har push'da
+    // qayta qo'shilmaydi): mavjudini eng yangisi bilan almashtiradi. Toast faqat
+    // haqiqatan yangi anomaliyada (aks holda takroriy push toast spamiga olib keladi).
     effect(() => {
       const anomaly = this.realtime.anomaly();
-      if (anomaly) {
-        untracked(() =>
-          this._anomalies.update((old) => [anomaly, ...old].slice(0, MAX_ANOMALIES)),
-        );
-        this.notify.warn('Anomaliya aniqlandi', anomaly.message);
-      }
+      if (!anomaly) return;
+      untracked(() => {
+        const key = anomalyKey(anomaly);
+        const isNew = !this._anomalies().some((a) => anomalyKey(a) === key);
+        this._anomalies.update((old) => {
+          const rest = old.filter((a) => anomalyKey(a) !== key);
+          return [anomaly, ...rest].slice(0, MAX_ANOMALIES);
+        });
+        if (isNew) this.notify.warn('Anomaliya aniqlandi', anomaly.message);
+      });
+    });
+
+    // SignalR jonli holatini connectionError'ga bog'lash: bir marta ulangandan keyin
+    // uzilsa "Aloqa yo'q" ko'rsatiladi (dastlabki ulanish/retry paytida bezovta qilmaydi).
+    effect(() => {
+      const connected = this.realtime.connected();
+      untracked(() => {
+        if (connected) {
+          this._hasConnected = true;
+          this._connectionError.set(false);
+        } else if (this._hasConnected) {
+          this._connectionError.set(true);
+        }
+      });
     });
   }
 

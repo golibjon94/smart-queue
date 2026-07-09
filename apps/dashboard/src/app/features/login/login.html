@@ -24,7 +24,7 @@
           </svg>
         </div>
         <h1 style="margin:16px 0 0;font-family:var(--font-display,'Space Grotesk');font-weight:700;font-size:28px;letter-spacing:-.3px;color:var(--text);">smart-queue</h1>
-        <p style="margin:6px 0 0;font-size:13.5px;color:var(--text-dim);">Aqlli navbat boshqaruvi</p>
+        <p style="margin:6px 0 0;font-size:13.5px;color:var(--text-dim);">Sun'iy intellektga asoslangan navbat boshqaruvi</p>
       </div>
 
       <!-- glass card -->
@@ -34,7 +34,7 @@
         (ngSubmit)="submit()"
       >
         <div class="flex flex-col gap-[7px]">
-          <label for="username" style="font-size:12px;font-weight:600;color:var(--text-dim);">Login</label>
+          <label for="username" style="font-size:12px;font-weight:600;color:var(--text-dim);">Foydalanuvchi nomi</label>
           <input
             id="username"
             name="username"
@@ -91,7 +91,7 @@
           @if (loading()) {
             <i class="pi pi-spin pi-spinner" style="font-size:15px;"></i> Kirilmoqda…
           } @else {
-            <i class="pi pi-sign-in" style="font-size:15px;"></i> Kirish
+            <i class="pi pi-sign-in" style="font-size:15px;"></i> Tizimga kirish
           }
         </button>
       </form>
@@ -136,12 +136,12 @@
         style="font-family:var(--font-mono,'JetBrains Mono');font-size:10.5px;letter-spacing:1.4px;text-transform:uppercase;color:var(--accent-d);padding:6px 12px;border-radius:99px;background:rgba(var(--d-rgb),.12);border:1px solid rgba(var(--d-rgb),.28);"
       >
         <span style="width:6px;height:6px;border-radius:50%;background:var(--accent-d);animation:sq-pulsedot-aqua 2s infinite;"></span>
-        AI-powered · LightGBM
+        AI orkestratsiya · LightGBM
       </span>
 
       <h2 style="margin:22px 0 0;font-family:var(--font-display,'Space Grotesk');font-weight:700;font-size:38px;line-height:1.18;letter-spacing:-.5px;color:var(--text);">
-        Bashorat qiladi.<br />
-        <span style="background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;">Boshqaradi. Maslahat beradi.</span>
+        Bashorat qiladi. Boshqaradi.<br />
+        <span style="background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;">Aqlli qarorlarni qo'llab-quvvatlaydi.</span>
       </h2>
 
       <ul class="m-0 flex list-none flex-col gap-4 p-0" style="margin-top:30px;">
@@ -149,19 +149,19 @@
           <span class="grid shrink-0 place-items-center" style="width:42px;height:42px;border-radius:12px;background:linear-gradient(150deg,rgba(var(--d-rgb),.22),rgba(var(--d-rgb),.05));border:1px solid rgba(var(--d-rgb),.3);">
             <i class="pi pi-chart-line" style="font-size:18px;color:var(--accent-d);"></i>
           </span>
-          Mijoz oqimini oldindan ko'radi
+          Mijozlar oqimini soatlab oldindan bashorat qiladi
         </li>
         <li class="flex items-center gap-3.5" style="font-size:15px;color:var(--text-dim);">
           <span class="grid shrink-0 place-items-center" style="width:42px;height:42px;border-radius:12px;background:linear-gradient(150deg,rgba(var(--a-rgb),.22),rgba(var(--a-rgb),.05));border:1px solid rgba(var(--a-rgb),.3);">
             <i class="pi pi-sitemap" style="font-size:18px;color:var(--accent-a);"></i>
           </span>
-          Kassalarni real vaqtda optimallashtiradi
+          Kassa resurslarini real vaqtda optimallashtiradi
         </li>
         <li class="flex items-center gap-3.5" style="font-size:15px;color:var(--text-dim);">
           <span class="grid shrink-0 place-items-center" style="width:42px;height:42px;border-radius:12px;background:linear-gradient(150deg,rgba(var(--c-rgb),.22),rgba(var(--c-rgb),.05));border:1px solid rgba(var(--c-rgb),.3);">
             <i class="pi pi-comments" style="font-size:18px;color:var(--accent-c);"></i>
           </span>
-          O'zbek tilida aniq tavsiya beradi
+          Operatorlarga o'zbek tilida aniq tavsiyalar beradi
         </li>
       </ul>
 
@@ -176,7 +176,7 @@
           <div class="absolute" style="inset:14px;border-radius:50%;background:radial-gradient(circle,#fff,var(--accent-d));box-shadow:0 0 12px var(--accent-d);animation:sq-pulse 2s ease-in-out infinite;"></div>
         </div>
         <div class="flex-1">
-          <div style="font-size:11.5px;color:var(--text-dim);">Bugungi bashorat aniqligi</div>
+          <div style="font-size:11.5px;color:var(--text-dim);">O'rtacha bashorat aniqligi</div>
           <div style="font-family:var(--font-display,'Space Grotesk');font-weight:700;font-size:26px;line-height:1.1;color:var(--text);">94.2%</div>
         </div>
         <svg viewBox="0 0 90 32" preserveAspectRatio="none" style="width:90px;height:30px;">

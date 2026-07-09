@@ -100,7 +100,9 @@ def _build_recommendations(svc: dict, reserve: list[dict],
             continue
         avg_sec = float(info["avg_sec"])
         mu = 1.0 / avg_sec
-        lam = ((st.arrivals_per_hour or max(st.waiting * 2.0, 1.0)) / 3600.0)
+        arr_hr = st.arrivals_per_hour if st.arrivals_per_hour is not None \
+            else max(st.waiting * 2.0, 1.0)
+        lam = arr_hr / 3600.0
         est_wait = _estimate_wait(lam, mu, st.open_counters, st.waiting, avg_sec)
 
         # QOIDA 0 (JIQ): bo'sh mos kassa bo'lsa navbatni o'sha kassaga yo'naltir
