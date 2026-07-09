@@ -4,14 +4,17 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { environment } from '../../../../environments/environment';
 import { NotificationService } from '../../../core/notifications/notification.service';
 import { RealtimeService } from '../../../core/realtime/realtime.service';
+import { VirtualTicketRow } from '../../virtual-queue/models/vq.model';
 import { DashboardApi } from './dashboard-api';
 import {
   Anomaly,
   BranchState,
+  FeedbackSummary,
   Forecast,
   Recommendation,
   RecommendationResponse,
   ScenarioName,
+  SimulateResult,
 } from '../models';
 
 const MAX_RECS = 10;
@@ -49,6 +52,13 @@ export class DashboardStore {
   private readonly _connectionError = signal(false);
   private readonly _scenarioLoading = signal(false);
 
+  // Faza 2
+  private readonly _simulation = signal<SimulateResult | null>(null);
+  private readonly _simulationLoading = signal(false);
+  private readonly _virtualTickets = signal<VirtualTicketRow[]>([]);
+  private readonly _feedback = signal<FeedbackSummary | null>(null);
+  private readonly _feedbackLoading = signal(false);
+
   // --- public readonly ---
   readonly state = this._state.asReadonly();
   readonly forecast = this._forecast.asReadonly();
@@ -56,6 +66,11 @@ export class DashboardStore {
   readonly anomalies = this._anomalies.asReadonly();
   readonly connectionError = this._connectionError.asReadonly();
   readonly scenarioLoading = this._scenarioLoading.asReadonly();
+  readonly simulation = this._simulation.asReadonly();
+  readonly simulationLoading = this._simulationLoading.asReadonly();
+  readonly virtualTickets = this._virtualTickets.asReadonly();
+  readonly feedback = this._feedback.asReadonly();
+  readonly feedbackLoading = this._feedbackLoading.asReadonly();
 
   // --- derived ---
   readonly branchName = computed(() => this._state()?.branchName ?? null);
@@ -74,6 +89,8 @@ export class DashboardStore {
     this.loadForecast();
     this.loadRecommendations();
     this.loadAnomalies();
+    this.loadVirtualTickets();
+    this.loadFeedbackSummary();
 
     // Real-vaqt ulanish + hub signallariga reaksiya
     void this.realtime.connect(this.branchId);
@@ -124,6 +141,56 @@ export class DashboardStore {
           this.notify.muted('Tavsiya rad etildi', rec?.action);
         }
       });
+  }
+
+  // --- Faza 2 actions ---
+
+  /** What-if: slayderdagi kassa soni bo'yicha ssenariyni qayta hisoblaydi (debounce komponentda). */
+  simulate(openCounters: number, serviceTypeId?: number | null): void {
+    this._simulationLoading.set(true);
+    this.api
+      .simulate({
+        branchId: this.branchId,
+        serviceTypeId: serviceTypeId ?? null,
+        scenario: { openCounters },
+      })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          this._simulation.set(res);
+          this._simulationLoading.set(false);
+        },
+        error: () => this._simulationLoading.set(false),
+      });
+  }
+
+  /** Demo izohi yuboradi va jamlanmani qayta yuklaydi (panel jonli "qizil"ga o'tishi uchun). */
+  submitFeedback(rating: number, comment: string): void {
+    this._feedbackLoading.set(true);
+    this.api
+      .postFeedback(this.branchId, rating, comment)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          if (res.sentiment === 'negative') {
+            this.notify.warn('Salbiy izoh qabul qilindi', res.topics?.join(', ') || undefined);
+          } else if (res.sentiment === 'positive') {
+            this.notify.success('Ijobiy izoh qabul qilindi');
+          } else {
+            this.notify.info('Izoh qabul qilindi');
+          }
+          this.loadFeedbackSummary();
+        },
+        error: () => {
+          this._feedbackLoading.set(false);
+          this.notify.error("Izohni yuborib bo'lmadi");
+        },
+      });
+  }
+
+  /** Menejer: virtual talonlar ro'yxatini qayta yuklaydi. */
+  refreshVirtualTickets(): void {
+    this.loadVirtualTickets();
   }
 
   // --- real-vaqt bog'lash ---
@@ -218,6 +285,30 @@ export class DashboardStore {
       .subscribe({
         next: (list) => this._anomalies.set(list.slice(0, MAX_ANOMALIES)),
         error: () => {},
+      });
+  }
+
+  private loadVirtualTickets(): void {
+    this.api
+      .getVirtualTickets(this.branchId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (rows) => this._virtualTickets.set(rows),
+        error: () => {},
+      });
+  }
+
+  private loadFeedbackSummary(): void {
+    this._feedbackLoading.set(true);
+    this.api
+      .getFeedbackSummary(this.branchId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (s) => {
+          this._feedback.set(s);
+          this._feedbackLoading.set(false);
+        },
+        error: () => this._feedbackLoading.set(false),
       });
   }
 

@@ -7,6 +7,17 @@ export const routes: Routes = [
     path: 'login',
     loadComponent: () => import('./features/login/login').then((m) => m.Login),
   },
+  // Mijoz virtual navbat sahifalari — PUBLIC (login yo'q, shell yo'q, mobil-birinchi).
+  {
+    path: 'q/join',
+    loadComponent: () =>
+      import('./features/virtual-queue/ui/queue-join/queue-join'),
+  },
+  {
+    path: 'q/:token',
+    loadComponent: () =>
+      import('./features/virtual-queue/ui/queue-ticket/queue-ticket'),
+  },
   {
     // Autentifikatsiya talab qilinadigan hamma narsa AppShell (sidebar + topbar) ichida.
     path: '',

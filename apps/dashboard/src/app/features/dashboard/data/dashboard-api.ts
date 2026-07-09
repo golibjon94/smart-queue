@@ -3,11 +3,14 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
+import { VirtualTicketRow } from '../../virtual-queue/models/vq.model';
 import {
   ActionType,
   AnomaliesResponseDto,
   Anomaly,
   BranchState,
+  FeedbackResult,
+  FeedbackSummary,
   Forecast,
   ForecastResponseDto,
   Recommendation,
@@ -17,6 +20,8 @@ import {
   RecommendationResponse,
   RecommendationRowDto,
   ScenarioName,
+  SimulateRequest,
+  SimulateResult,
 } from '../models';
 
 // Stateless data-access qatlami: HTTP chaqiruvlar va DTO -> view-model mapping.
@@ -79,6 +84,36 @@ export class DashboardApi {
         params: { branchId },
       })
       .pipe(map((r) => (Array.isArray(r) ? r : (r.anomalies ?? []))));
+  }
+
+  // --- Faza 2 ---
+
+  /** What-if simulyatsiya (side-effektsiz hisob, DB yozuvsiz). */
+  simulate(req: SimulateRequest): Observable<SimulateResult> {
+    return this.http.post<SimulateResult>(`${this.base}/api/simulate`, req);
+  }
+
+  /** Filialning faol virtual (QR) talonlari — menejer ko'rinishi. */
+  getVirtualTickets(branchId: number): Observable<VirtualTicketRow[]> {
+    return this.http.get<VirtualTicketRow[]>(`${this.base}/api/vq/tickets`, {
+      params: { branchId },
+    });
+  }
+
+  /** Sentiment-feedback jamlanma (taqsimot, top mavzular, "issiqlik"). */
+  getFeedbackSummary(branchId: number): Observable<FeedbackSummary> {
+    return this.http.get<FeedbackSummary>(`${this.base}/api/feedback/summary`, {
+      params: { branchId },
+    });
+  }
+
+  /** Demo izohi — dashboard'dan baho+izoh yuborish (sentiment jonli ko'rsatish uchun). */
+  postFeedback(branchId: number, rating: number, comment: string): Observable<FeedbackResult> {
+    return this.http.post<FeedbackResult>(`${this.base}/api/feedback`, {
+      branchId,
+      rating,
+      comment: comment.trim() || null,
+    });
   }
 }
 

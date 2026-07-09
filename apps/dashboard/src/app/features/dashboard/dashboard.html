@@ -19,10 +19,21 @@
   <div class="flex min-w-0 flex-col gap-[18px]">
     <app-counters-panel [counters]="store.state()?.counters ?? []" />
     <app-queues-table [queues]="store.state()?.queues ?? []" />
+    <app-qr-join-card [queues]="store.state()?.queues ?? []" [branchId]="branchId" />
+    <app-virtual-tickets-panel
+      [tickets]="store.virtualTickets()"
+      (refresh)="onRefreshTickets()"
+    />
     <app-anomalies-panel [anomalies]="store.anomalies()" />
   </div>
 
   <div class="flex min-w-0 flex-col gap-[18px]">
+    <app-whatif-panel
+      [currentCounters]="store.openCounters()"
+      [simulation]="store.simulation()"
+      [loading]="store.simulationLoading()"
+      (simulate)="onSimulate($event)"
+    />
     <app-forecast-chart
       [forecast]="store.forecast()"
       [hours]="store.forecast()?.points?.length ?? 24"
@@ -31,6 +42,11 @@
       [recommendations]="store.recommendations()"
       [proposedCount]="store.proposedCount()"
       (respond)="onRespond($event)"
+    />
+    <app-feedback-panel
+      [summary]="store.feedback()"
+      [loading]="store.feedbackLoading()"
+      (submit)="onFeedback($event)"
     />
   </div>
 </div>
