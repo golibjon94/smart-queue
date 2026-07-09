@@ -31,3 +31,12 @@ SLOW_CRITICAL_RATIO = 2.00
 
 # Kutishni hisobotda cheklash (∞ ni JSON'ga chiqarmaslik uchun)
 WAIT_CAP_SEC = 3600
+
+# --- What-if simulyatsiya (/simulate) zaxira qiymatlari ---
+# DB'da ma'lumot topilmasa demo buzilmasin uchun oqilona standartlar.
+SIM_DEFAULT_AVG_SERVICE_SEC = 240    # service_types bo'sh bo'lsa
+SIM_DEFAULT_ARRIVALS_PER_HOUR = 60   # forecast topilmasa
+SIM_DEFAULT_OPEN_COUNTERS = 3        # faol kassa topilmasa
+
+# --- QR virtual navbat ETA tuzatishi ---
+ETA_PEAK_MAX_FACTOR = 1.5            # peak'da ETA'ni ko'pi bilan shu marta oshiramiz

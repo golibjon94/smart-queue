@@ -91,3 +91,71 @@ class AnomalyOut(BaseModel):
 class AnomalyResponse(BaseModel):
     branch_id: int
     anomalies: list[AnomalyOut]
+
+
+# --- /simulate (What-if simulyatsiya, §4) ---
+
+class SimulateScenarioIn(BaseModel):
+    open_counters: int = Field(ge=1, le=60)       # menejer slayderda tanlagan kassa soni
+    arrivals_per_hour: float | None = None        # None -> forecast'dan
+    avg_service_sec: float | None = None          # None -> tarixiy o'rtachadan
+
+
+class SimulateRequest(BaseModel):
+    branch_id: int
+    service_type_id: int | None = None            # None -> filial jami
+    scenario: SimulateScenarioIn
+
+
+class SimulateSnapshot(BaseModel):
+    open_counters: int
+    avg_wait_sec: int
+    utilization: float
+    prob_wait: float
+
+
+class SimulateDelta(BaseModel):
+    wait_reduction_sec: int
+    wait_reduction_pct: int
+
+
+class SimulateResponse(BaseModel):
+    branch_id: int
+    service_type_id: int | None
+    baseline: SimulateSnapshot
+    scenario: SimulateSnapshot
+    delta: SimulateDelta
+
+
+# --- /eta (QR virtual navbat ETA, §5.5) ---
+
+class EtaRequest(BaseModel):
+    branch_id: int
+    service_type_id: int | None = None
+    position: int = Field(ge=1)                    # navbatdagi o'rin (1 = keyingi)
+    open_counters: int = Field(default=1, ge=1)
+    avg_service_sec: float | None = None           # None -> service_types'dan
+    arrivals_next_hour: float | None = None        # None -> forecast'dan
+
+
+class EtaResponse(BaseModel):
+    position: int
+    eta_sec: int
+    base_eta_sec: int                              # forecast tuzatishisiz baza
+    forecast_factor: float                         # >= 1.0 (peak tuzatishi)
+
+
+# --- /classify-feedback (Sentiment tasniflash, §6.2) ---
+
+class ClassifyFeedbackRequest(BaseModel):
+    comments: list[str]
+
+
+class FeedbackResult(BaseModel):
+    sentiment: str                                 # positive | negative | neutral
+    score: float
+    topics: list[str]
+
+
+class ClassifyFeedbackResponse(BaseModel):
+    results: list[FeedbackResult]
