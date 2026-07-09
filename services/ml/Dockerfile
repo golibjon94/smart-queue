@@ -12,6 +12,7 @@ COPY app ./app
 COPY forecasting ./forecasting
 COPY recommend ./recommend
 COPY simulation ./simulation
+COPY sentiment ./sentiment
 
 RUN pip install --no-cache-dir .
 
