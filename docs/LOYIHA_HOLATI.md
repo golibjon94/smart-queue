@@ -19,24 +19,32 @@ Uch qatlam: **Bashorat** (kelajakni ko'radi) · **Orkestratsiya** (hozirni boshq
 
 ---
 
-## 2. Hozirgi holat: FAZA 0 TO'LIQ TAYYOR ✅
+## 2. Hozirgi holat: FAZA 0 VA FAZA 1 TAYYOR ✅
 
 Mock (sintetik) ma'lumotda ishlaydigan **to'liq end-to-end demo** tayyor va Docker'da
 ishlaydi. Faza 0 rejasidagi B0–B7 bloklari + qo'shimcha auth va professional UI bajarilgan.
+Faza 1 real-vaqt + orkestratsiya paketi ham ijro etilgan.
 
-**Nima ishlaydi (tekshirilgan):**
+**Faza 0 — nima ishlaydi (tekshirilgan):**
 - ✅ Sintetik generator — 270 kun, ~152k talon (NHPP + navbat simulyatsiyasi)
 - ✅ LightGBM bashorat — filial-soat **MAPE 13.67%** (maqsad ≤15%, nazariy minimal 12.42%)
 - ✅ Erlang-C tavsiya dvigateli — ACTION + REASON + BENEFIT
 - ✅ FastAPI ML servisi — `/health`, `/forecast`, `/recommendations`
 - ✅ .NET 10 Gateway — JWT auth, ML proxy, demo holat, audit izi (vertical-slice arxitektura)
-- ✅ Angular 22 dashboard — PrimeNG + Tailwind, login, sidebar, dark mode, real-vaqt polling
+- ✅ Angular 22 dashboard — PrimeNG + Tailwind, login, sidebar, yangi dizayn, real-vaqt
 - ✅ Login/parol autentifikatsiya (default admin)
 - ✅ Butun stack Docker Compose'da (5 servis)
 - ✅ Brauzerda e2e: login → dashboard → demo cho'qqi → tavsiya qabul → audit → logout
 
-**Faza 0 muvaffaqiyat mezoni bajarildi:** `docker compose up` bilan ko'tariladi, MAPE ≤15%,
-demo "tushlik cho'qqisi" tugmasi jonli ishlaydi.
+**Faza 1 — nima bajarildi:**
+- ✅ **SignalR real-vaqt push** — HTTP polling olib tashlandi, Gateway `/hubs/queue`
+  hub'i navbat holati, tavsiya va anomaliyani jonli push qiladi; Redis backplane faol
+- ✅ **JIQ marshrutlash** — `route_queue` harakat turi (bo'sh/eng qisqa kassaga yo'naltirish)
+- ✅ **EWMA anomaliya aniqlash** — prognoz qoldig'i ustida control chart; `/anomalies`
+  endpointi va dashboard'da **anomaliya paneli** (surge / slow_operator / backlog)
+
+**Muvaffaqiyat mezonlari bajarildi:** `docker compose up` bilan ko'tariladi, MAPE ≤15%,
+demo "tushlik cho'qqisi" tugmasi jonli ishlaydi, dashboard SignalR orqali so'rovsiz yangilanadi.
 
 ---
 
@@ -48,7 +56,7 @@ demo "tushlik cho'qqisi" tugmasi jonli ishlaydi.
 | Gateway | .NET 10 | `sq-gateway` | **5080** | tashqi kirish nuqtasi |
 | ML servisi | Python 3.11 + FastAPI | `sq-python-ml` | **8000** | Swagger: `:8000/docs` |
 | Ma'lumotlar bazasi | PostgreSQL 17 + TimescaleDB | `sq-timescaledb` | **5433** | (lokal PG18'ga tegmaydi) |
-| Kesh/backplane | Redis 7 | `sq-redis` | **6379** | (SignalR — Faza 1) |
+| Kesh/backplane | Redis 7 | `sq-redis` | **6379** | SignalR backplane (Faza 1 — faol) |
 
 > **Port o'zgartirish:** dashboard porti `.env` dagi `DASHBOARD_PORT` orqali. Compose ham,
 > gateway CORS'i ham o'sha o'zgaruvchidan oladi — faqat `up -d` qayta ko'tarish kifoya.
@@ -113,10 +121,11 @@ cd services/ml
 
 | Qatlam | Texnologiya |
 |--------|-------------|
-| Dashboard | Angular 22 (standalone, **zoneless**, signals), PrimeNG 21 (Aura), Tailwind v4, Chart.js |
-| Gateway | .NET 10, ASP.NET Core MVC, Npgsql (raw ADO.NET), JWT, BCrypt, Options pattern |
-| ML | Python 3.11, FastAPI, LightGBM, NumPy, pandas, psycopg 3 |
+| Dashboard | Angular 22 (standalone, **zoneless**, signals), PrimeNG 21 (Aura), Tailwind v4, Chart.js, @microsoft/signalr, theme switcher (5 preset) + aurora design tokens |
+| Gateway | .NET 10, ASP.NET Core MVC, SignalR (Redis backplane), Npgsql (raw ADO.NET), JWT, BCrypt, Options pattern |
+| ML | Python 3.11, FastAPI, LightGBM, NumPy, pandas, psycopg 3, EWMA anomaliya |
 | DB | PostgreSQL 17 + TimescaleDB (hypertable, continuous aggregate) |
+| Real-vaqt | SignalR (WebSocket push, polling emas) + Redis backplane |
 | Infra | Docker Compose, nginx (dashboard), Redis |
 
 ---
@@ -193,9 +202,7 @@ smart-queue/
 
 ## 11. Ataylab qoldirilgan (keyingi fazalar)
 
-Faza 0 scope'iga kirmagan (ROADMAP bo'yicha):
-- **SignalR real-vaqt push** (hozir polling), Redis backplane → Faza 1
-- **To'liq JIQ marshrutlash**, EWMA anomaliya aniqlash → Faza 1
+Faza 0 va 1 scope'idan tashqarida (ROADMAP bo'yicha):
 - **Prophet/StatsForecast** fallback, champion-challenger, retraining scheduler, drift → Faza 2
 - **Real iQueue ETL** (`source='real'`), ovoz/TTS, tablo integratsiyasi → Faza 2
 - **Kamera/Face-ID** (biometrik — huquqiy audit shart) → Faza 3
@@ -203,10 +210,10 @@ Faza 0 scope'iga kirmagan (ROADMAP bo'yicha):
 
 ---
 
-## 11.1 Faza 1 bajarish paketi (tayyor)
+## 11.1 Faza 1 bajarish paketi (ijro etilgan ✅)
 
-Faza 1'ni uch alohida chatda (PyCharm/ML, Rider/Gateway, WebStorm/Frontend) sifatli
-bajarish uchun tayyor prompt va kontrakt: **[`faza1/`](faza1/)** papkasi.
+Faza 1 uch alohida chatda (PyCharm/ML, Rider/Gateway, WebStorm/Frontend) bo'yicha
+**bajarildi**. Manba prompt va servislararo kontrakt: **[`faza1/`](faza1/)** papkasi.
 - [`faza1/FAZA1_UMUMIY.md`](faza1/FAZA1_UMUMIY.md) — servislararo kontrakt (avval o'qiladi)
 - `faza1/FAZA1_{ML,GATEWAY,FRONTEND}_PROMPT.md` — har IDE/chat uchun nusxalanadigan prompt
 - [`faza1/README.md`](faza1/README.md) — qanday ishlatish + tartib
@@ -219,18 +226,15 @@ Har qism o'z ARCHITECTURE.md oxirida batafsil ro'yxatga ega. Eng ustuvorlari:
 
 **Backend (Gateway):**
 - [ ] Birlik testlar (`services/gateway/tests/`)
-- [ ] SignalR hub (`Features/Realtime/`) + Redis backplane
 - [ ] OpenAPI/Swagger (`AddOpenApi()`)
 
 **Frontend (Dashboard):**
 - [ ] "Analitika" va "Sozlamalar" sahifalari (hozir "Tez orada" placeholder)
-- [ ] SignalR client (polling o'rniga)
 - [ ] Foydalanuvchilarni boshqarish UI (admin uchun)
 
 **ML/AI:**
 - [ ] Prophet/StatsForecast fallback + champion-challenger
 - [ ] Retraining scheduler (APScheduler) + drift monitoring
-- [ ] EWMA anomaliya aniqlash
 
 **Umumiy:**
 - [ ] Foydalanuvchi rollari (admin/menejer/operator) bo'yicha ruxsatlar

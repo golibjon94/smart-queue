@@ -102,7 +102,7 @@ Har bir feature 4 qatlamga bo'linadi:
                                  │ Observable
                     ┌────────────▼─────────────┐
                     │  data/<feature>-store.ts │   signal store
-                    │  holat, polling, action  │   feature-scoped
+                    │  holat, real-vaqt, action│   feature-scoped
                     └────────────┬─────────────┘   (component providers)
                                  │ signal'lar
                     ┌────────────▼─────────────┐
@@ -136,8 +136,9 @@ Butun feature holati va logikasi shu yerda:
 
 - **Yozib bo'ladigan** `private _signal`, tashqariga `.asReadonly()`.
 - **Hosila** qiymatlar `computed()` (masalan `isPeak`, `openCounters`, `proposedCount`).
-- **Polling** — `timer(0, pollIntervalMs).pipe(switchMap, catchError, takeUntilDestroyed)`.
-  `OnDestroy` ishlatilmaydi — `takeUntilDestroyed(destroyRef)` avtomatik tozalaydi.
+- **Real-vaqt** — Faza 1'da **polling olib tashlandi**. Store boshlang'ich holatni bir martalik
+  HTTP bilan yuklaydi, keyin `effect()` orqali `RealtimeService` (SignalR) signallariga reaksiya
+  bildiradi. Batafsil: §3.5. `takeUntilDestroyed(destroyRef)` avtomatik tozalaydi.
 - **Action**lar — `toggleScenario()`, `respond()`.
 - **Feature-scoped** — `@Injectable()` (root emas), container `providers` da beriladi.
   Shu sabab store va uning polling'i route hayotiy sikliga bog'lanadi.
@@ -207,7 +208,7 @@ Autentifikatsiyadan o'tgan barcha sahifalar **`AppShell`** ichida:
 - **`Sidebar`** — brand + data-driven nav (`nav.ts` → `NAV_ITEMS`). Active holat
   `routerLinkActive` + `ngClass`. `LayoutService.sidebarCollapsed` bilan yig'iladi.
   `md:` dan pastda yashirin.
-- **`ShellTopbar`** — hamburger (sidebar toggle), dark-mode toggle, user menu + chiqish.
+- **`ShellTopbar`** — hamburger (sidebar toggle), theme-switcher (5 preset: petrol/slate/navy/plum/light), user menu + chiqish.
 - **`LayoutService`** — `sidebarCollapsed` signali.
 - Dashboard'ga xos chrome (filial nomi + connection tag + demo tugma) → `DashboardHeader`
   (feature ichida, shell'da emas).

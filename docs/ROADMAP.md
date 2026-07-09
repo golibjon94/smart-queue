@@ -18,6 +18,7 @@ demo       tavsiya    + ovoz       Face-ID
 ---
 
 ## FAZA 0 — Sintetik ma'lumot + yadro
+**Status: ✅ Bajarildi** — sintetik demo ishlaydi (filial-soat MAPE 13.67%).
 **Maqsad:** mock ma'lumotda ishlaydigan to'liq demo.
 
 ### Deliverable
@@ -45,6 +46,7 @@ Python (SimPy/NumPy, LightGBM, FastAPI), PostgreSQL+TimescaleDB, Angular, .NET g
 ---
 
 ## FAZA 1 — Ekranda tavsiya MVP (hardware yo'q)
+**Status: ✅ Bajarildi** — SignalR real-vaqt push (polling olib tashlangan), JIQ marshrutlash, EWMA anomaliya + panel.
 **Maqsad:** operator/menejerga real-vaqt aqlli tavsiyalar.
 
 ### Deliverable

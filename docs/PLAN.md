@@ -18,7 +18,7 @@ smart-queue/
 │   ├── DATABASE.md
 │   ├── ROADMAP.md
 │   ├── PLAN.md                    # ← shu fayl
-│   ├── DEMO_SCENARIO.md           # (hali yozilmagan — keyin)
+│   ├── DEMO_SCENARIO.md           # (mavjud)
 │   └── BUSINESS_DEAL.md           # (hali yozilmagan — keyin)
 │
 ├── db/
@@ -44,7 +44,7 @@ smart-queue/
 │   │   ├── pyproject.toml
 │   │   └── Dockerfile
 │   │
-│   └── gateway/                   # Gateway — .NET 8
+│   └── gateway/                   # Gateway — .NET 10
 │       ├── src/SmartQueue.Gateway/
 │       │   ├── Controllers/       # proxy: forecast, recommendations, queue-state
 │       │   ├── Hubs/              # SignalR (Faza 1 da to'ldiriladi)
@@ -167,11 +167,11 @@ TECH_STACK.md §2: global model, rekursiv multi-step.
 
 > To'liq JIQ marshrutlash va real-vaqt tavsiya oqimi — **Faza 1**. Faza 0 da tavsiya bitta so'rov-javob darajasida (demo uchun yetarli).
 
-### B5. .NET 8 Gateway — minimal (~2-3 kun)
+### B5. .NET 10 Gateway — minimal (~2-3 kun)
 
 | # | Vazifa | DoD |
 |---|--------|-----|
-| 5.1 | .NET 8 Web API skelet, config, `GET /health` | Ishga tushadi, health 200 |
+| 5.1 | .NET 10 Web API skelet, config, `GET /health` | Ishga tushadi, health 200 |
 | 5.2 | ML servisga proxy endpointlar: `/api/forecast`, `/api/recommendations` (typed HttpClient) | Gateway orqali chaqirish ML natijasini qaytaradi |
 | 5.3 | `/api/queue-state` — joriy mock navbat holati (DB'dagi oxirgi hodisalardan yoki demo-holat xizmatidan) | Dashboard uchun yetarli JSON |
 | 5.4 | CORS sozlash (dashboard origin), oddiy API-key middleware (to'liq JWT — Faza 1) | Dashboard'dan so'rovlar o'tadi |

@@ -2,7 +2,7 @@
 
 > Vaqtinchalik ishchi nom. Mavjud bank navbat tizimini (iQueue.uz) **"aqlli"** qiluvchi AI qo'shimcha modul: bashorat (LightGBM) + real-vaqt tavsiyalar (Erlang-C) + o'zbekcha dashboard.
 
-**Holat: Faza 0 tayyor** — sintetik ma'lumotda ishlaydigan to'liq demo (bashorat MAPE 13.7%, maqsad ≤15%).
+**Holat: Faza 1 tayyor** (SignalR real-vaqt push, JIQ marshrutlash, EWMA anomaliya) — sintetik ma'lumotda ishlaydigan to'liq demo (bashorat MAPE 13.7%, maqsad ≤15%).
 
 ## Hujjatlar
 
@@ -26,7 +26,8 @@
 db/               SQL migratsiyalar + seed (2 filial, 11 kassa, 5 xizmat)
 services/ml/      Python 3.11: sintetik generator, LightGBM, FastAPI, Erlang-C
 services/gateway/ .NET 10 minimal API: auth, proxy, demo-ssenariy, audit
-apps/dashboard/   Angular 22 + Chart.js: navbat, bashorat, tavsiyalar
+apps/dashboard/   Angular 22 + Chart.js: navbat, bashorat, tavsiyalar, anomaliya paneli
+                  (real-vaqt SignalR push, theme switcher — 5 preset)
 infra/            docker-compose (5 servis)
 scripts/          migrate.ps1
 ```

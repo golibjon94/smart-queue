@@ -10,8 +10,8 @@
 |--------|-------------|------|
 | Dashboard | **Angular** | Foydalanuvchi tanlovi; boy komponent ekotizimi |
 | ML / bashorat | **Python + FastAPI** | ML ekotizimi (LightGBM, StatsForecast, Prophet) faqat Pythonda yetuk |
-| Orkestratsiya / Gateway | **.NET 8** | Kuchli API, SignalR real-vaqt, foydalanuvchi tajribasi |
-| Ma'lumotlar bazasi | **PostgreSQL 16 + TimescaleDB** | Navbat hodisalari = yuqori hajmli vaqt-qatori |
+| Orkestratsiya / Gateway | **.NET 10** | Kuchli API, SignalR real-vaqt, foydalanuvchi tajribasi |
+| Ma'lumotlar bazasi | **PostgreSQL 17 + TimescaleDB** | Navbat hodisalari = yuqori hajmli vaqt-qatori |
 | Real-vaqt | **SignalR** | WebSocket + avtomatik fallback |
 | Deployment | **Docker Compose** | MVP uchun bitta VPS yetarli |
 | Kesh / backplane | **Redis** | SignalR masshtablash + kesh |

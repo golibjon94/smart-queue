@@ -19,7 +19,7 @@ Butun arxitektura bitta qarorga asoslangan: **biznes-mantiq (miya) taqdimotdan (
                          ┌────────────▼─────────────┐
                          │   "MIYA" (doim sizniki)   │
                          │                           │
-                         │  .NET 8 API Gateway       │
+                         │  .NET 10 API Gateway      │
                          │  (auth, orkestratsiya,    │
                          │   real-vaqt push)         │
                          └────────────┬─────────────┘
@@ -60,7 +60,7 @@ Bashorat, tavsiya generatsiyasi va anomaliya aniqlashning yadrosi.
 - `POST /recommendations` — joriy holatga ko'ra harakat tavsiyalari.
 - `POST /train` — model qayta o'qitish (yoki alohida batch job).
 
-### 2.2 Orkestratsiya + Gateway — .NET 8
+### 2.2 Orkestratsiya + Gateway — .NET 10
 Tashqi dunyoning yagona kirish nuqtasi.
 
 **Mas'uliyat:**
@@ -78,7 +78,7 @@ Operator va menejer paneli. **API'ning birinchi mijozi** — ya'ni hech qanday b
 - Tavsiyalar oqimi (ACTION + REASON + BENEFIT + qabul/rad tugmasi).
 - Menejer tahlili (before/after, ROI, tavsiya qabul darajasi).
 
-### 2.4 Ma'lumotlar bazasi — PostgreSQL 16 + TimescaleDB
+### 2.4 Ma'lumotlar bazasi — PostgreSQL 17 + TimescaleDB
 Navbat hodisalari hypertable'da; bashorat va tavsiyalar audit izi bilan. Batafsil: [`DATABASE.md`](DATABASE.md).
 
 ---

@@ -36,26 +36,34 @@ iQueue mavjud navbat ma'lumotlaridan foydalanib, mijozlar oqimini oldindan basho
 
 | Hujjat | Nima haqida | Kim uchun |
 |--------|-------------|-----------|
-| [`ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Texnik arxitektura, stack, komponentlar oqimi, integratsiya patternlari | Dasturchi |
-| [`TECH_STACK.md`](docs/TECH_STACK.md) | Texnologiyalar, kutubxonalar, ML modellari, TTS tanlovi | Dasturchi |
-| [`DATABASE.md`](docs/DATABASE.md) | To'liq DB sxema, DDL, TimescaleDB | Dasturchi |
-| [`ROADMAP.md`](docs/ROADMAP.md) | Fazalar (0→3), deliverable, vaqt, metrika | Dasturchi + biznes |
-| [`DEMO_SCENARIO.md`](docs/DEMO_SCENARIO.md) | "O'z-o'ziga javob beruvchi" demo ssenariysi | Sotuv + dasturchi |
-| [`BUSINESS_DEAL.md`](docs/BUSINESS_DEAL.md) | Mobile Solutions bilan muzokara, revenue-share | Biznes / muzokara |
+| [`LOYIHA_HOLATI.md`](LOYIHA_HOLATI.md) | **Handoff / umumiy holat — davom ettirish uchun avval shuni o'qing** | Hamma |
+| [`ARCHITECTURE.md`](ARCHITECTURE.md) | Texnik arxitektura, stack, komponentlar oqimi, integratsiya patternlari | Dasturchi |
+| [`TECH_STACK.md`](TECH_STACK.md) | Texnologiyalar, kutubxonalar, ML modellari, TTS tanlovi | Dasturchi |
+| [`DATABASE.md`](DATABASE.md) | To'liq DB sxema, DDL, TimescaleDB | Dasturchi |
+| [`ROADMAP.md`](ROADMAP.md) | Fazalar (0→3), deliverable, vaqt, metrika | Dasturchi + biznes |
+| [`PLAN.md`](PLAN.md) | Faza 0 mayda vazifalar rejasi (B0–B7) | Dasturchi |
+| [`DEMO_SCENARIO.md`](DEMO_SCENARIO.md) | "O'z-o'ziga javob beruvchi" demo ssenariysi | Sotuv + dasturchi |
+| [`PYTHON_AI_HISOBOT.md`](PYTHON_AI_HISOBOT.md) | Python/AI qismi — generator, LightGBM, Erlang-C, natijalar | Dasturchi |
+| [`faza1/`](faza1/) | Faza 1 bajarish paketi (servislararo kontrakt + IDE promptlari) | Dasturchi |
+| [`../services/gateway/ARCHITECTURE.md`](../services/gateway/ARCHITECTURE.md) | Gateway (.NET) ichki arxitektura | Dasturchi |
+| [`../apps/dashboard/ARCHITECTURE.md`](../apps/dashboard/ARCHITECTURE.md) | Dashboard (Angular) ichki arxitektura | Dasturchi |
 
-> **Muzokara uchun:** `BUSINESS_DEAL.md` va `DEMO_SCENARIO.md` asosida alohida PDF taqdimot tayyorlanadi.
+> **Muzokara uchun:** `DEMO_SCENARIO.md` asosida alohida PDF taqdimot tayyorlanadi.
 
 ---
 
 ## Hozir nima qilish kerak (keyingi qadam)
 
-1. **Faza 0** ni boshlash: sintetik ma'lumot generatori + DB sxema + LightGBM bashorat + Angular demo. Batafsil: [`ROADMAP.md`](docs/ROADMAP.md).
-2. Ishlaydigan demo tayyor bo'lgach → Mobile Solutions bilan uchrashuv (mock data bilan, real data so'rashdan oldin).
+**Faza 0 va Faza 1 tugagan** ✅ — sintetik ma'lumotdagi to'liq demo tayyor: bashorat, real-vaqt
+SignalR push, JIQ marshrutlash, EWMA anomaliya paneli. Joriy holat: [`LOYIHA_HOLATI.md`](LOYIHA_HOLATI.md).
+
+1. Ishlaydigan demo bilan → Mobile Solutions bilan uchrashuv (mock data, real data so'rashdan oldin).
+2. **Faza 2** ni tayyorlash: real iQueue ETL (`source='real'`), inkremental retraining + drift monitoring, mavjud ovoz/tablo integratsiyasi. Batafsil: [`ROADMAP.md`](ROADMAP.md).
 
 ---
 
 ## Texnologiya (qisqacha)
 
-`Angular` (dashboard) · `Python + FastAPI` (ML/bashorat) · `.NET 8` (orkestratsiya + SignalR) · `PostgreSQL 16 + TimescaleDB` (navbat hodisalari) · `Docker Compose` (deployment)
+`Angular` (dashboard) · `Python + FastAPI` (ML/bashorat) · `.NET 10` (orkestratsiya + SignalR) · `PostgreSQL 17 + TimescaleDB` (navbat hodisalari) · `Docker Compose` (deployment)
 
-To'liq: [`TECH_STACK.md`](docs/TECH_STACK.md).
+To'liq: [`TECH_STACK.md`](TECH_STACK.md).

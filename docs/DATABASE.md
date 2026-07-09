@@ -1,12 +1,12 @@
 # DATABASE.md — Ma'lumotlar Bazasi Arxitekturasi
 
-> Loyiha: `smart-queue` · PostgreSQL 16 + TimescaleDB
+> Loyiha: `smart-queue` · PostgreSQL 17 + TimescaleDB
 
 ---
 
 ## 1. Asos tanlovi
 
-**PostgreSQL 16 + TimescaleDB kengaytmasi.** Navbat hodisalari yuqori hajmli vaqt-qatori bo'lgani uchun `queue_events` **hypertable** qilinadi:
+**PostgreSQL 17 + TimescaleDB kengaytmasi.** Navbat hodisalari yuqori hajmli vaqt-qatori bo'lgani uchun `queue_events` **hypertable** qilinadi:
 - Avtomatik vaqt bo'yicha chunking (bo'laklash).
 - Chunk exclusion → vaqt-oraliqli so'rovlarda 10–100x tezlanish.
 - Continuous aggregates → soatlik/kunlik rollup'lar fon rejimda inkremental.
@@ -177,6 +177,28 @@ CREATE TABLE feedback_csi (
 **`recommendations` jadvali — ROI isbotining yuragi:**
 `status` + `observed_outcome` ustunlari "nima tavsiya qilindi → qabul qilindimi → natija qanday bo'ldi" zanjirini saqlaydi. Bu mijozga qiymatni **raqamlarda** ko'rsatish imkonini beradi ("bu oy 47 ta tavsiya, 38 tasi qabul qilindi, o'rtacha kutish 11 daqiqa kamaydi").
 
+### 2.5 Foydalanuvchilar (autentifikatsiya)
+
+```sql
+-- Foydalanuvchilar — dashboard login (JWT auth)
+CREATE TABLE users (
+  user_id       BIGSERIAL PRIMARY KEY,
+  username      TEXT UNIQUE NOT NULL,
+  password_hash TEXT NOT NULL,            -- BCrypt hash (plain parol saqlanmaydi)
+  full_name     TEXT,
+  role          TEXT NOT NULL DEFAULT 'manager',  -- admin | manager | operator
+  is_active     BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
+  last_login_at TIMESTAMPTZ
+);
+
+CREATE INDEX idx_users_username ON users (username);
+```
+
+Gateway JWT (HS256) autentifikatsiyasi shu jadvalga tayanadi. Parollar **BCrypt** bilan
+hash qilinadi (SQL'da plain hash saqlanmaydi). Default admin gateway birinchi startup'ida
+`.env` qiymatlaridan yaratiladi.
+
 ---
 
 ## 3. Indekslash strategiyasi
@@ -229,6 +251,7 @@ feedback_csi ──► (kelajak: o'zbekcha NLP sentiment)
 2. `queue_events` hypertable + indekslar.
 3. Continuous aggregate (hourly_arrivals).
 4. forecasts, recommendations, feedback_csi.
-5. Compression/retention policy (faqat prod, MVP'da ixtiyoriy).
+5. `users` (autentifikatsiya — `005_users.sql`).
+6. Compression/retention policy (faqat prod, MVP'da ixtiyoriy).
 
 > **Mock → real o'tish:** sintetik generator `source='synthetic'` bilan yozadi. Mobile Solutions real ma'lumot bergач, ETL `source='real'` bilan aynan shu jadvalga yozadi. Model ikkalasini ham o'qiydi. Hech narsa buzilmaydi.

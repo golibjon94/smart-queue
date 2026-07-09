@@ -30,16 +30,24 @@ maosh kuni. MAPE ~14% — retail bashorat me'yoridan yaxshi. Bu grafik har kuni
 avtomatik yangilanadi."
 
 ### 3-qadam — "Tushlik cho'qqisi" tugmasi (90 soniya) ⭐ kulminatsiya
-Tugma bosiladi → dashboard jonli o'zgaradi: To'lovlar navbati 13-14 kishiga
-sakraydi, taxminiy kutish ~20+ daqiqa, karta rangi ogohlantirishga o'tadi.
-2-3 soniyada **tavsiya kartasi** paydo bo'ladi:
+Tugma bosiladi → dashboard **so'rovsiz, jonli** o'zgaradi (SignalR push — sahifa
+yangilanmaydi, so'rov yubormaydi): To'lovlar navbati 13-14 kishiga sakraydi, taxminiy
+kutish ~20+ daqiqa, karta rangi ogohlantirishga o'tadi. Bir vaqtning o'zida **anomaliya
+paneli** yonadi — `surge` (portlash) signali: "To'lovlar navbatida kutilmagan ko'tarilish".
+2-3 soniyada **tavsiya kartasi** push qilinadi:
 
 > **6-kassani oching**
 > Sabab: «To'lovlar» navbatida 14 kishi, taxminiy kutish ~28 daqiqa
 > Kutilayotgan foyda: kutish ~8 daqiqaga kamayadi (28 → 20)
 
-**Gap:** "Tizim shunchaki statistika ko'rsatmadi — *nima qilish kerakligini* aytdi,
+**Gap:** "Ekran o'zi jonlandi — hech kim yangilamadi, tizim SignalR orqali darhol
+push qildi. Va shunchaki statistika ko'rsatmadi — *nima qilish kerakligini* aytdi,
 *nega* va *qancha foyda* bilan. Bu Erlang-C navbat nazariyasi, taxmin emas."
+
+**Anomaliya paneli haqida (ixtiyoriy 15 soniya):** panel EWMA control chart bilan
+prognoz xatoligini kuzatadi. `surge`dan tashqari `slow_operator` (sekin kassa — bitta
+oyna xizmat vaqti odatdagidan sezilarli sekin) va `backlog` (navbat to'planishi)
+signallarini ham ko'rsatadi, har biri jiddiylik darajasi (warning/serious/critical) bilan.
 
 ### 4-qadam — Menejer qarori + audit (45 soniya)
 "Qabul qilish" bosiladi → tavsiya statusi `accepted`, audit iziga yoziladi.
@@ -56,10 +64,12 @@ Uch xil integratsiya: tayyor dashboard, API, yoki iframe."
 
 ## Texnik xarita (qaysi tugma nimani chaqiradi)
 
-| Demo harakati | API chaqiruv |
+| Demo harakati | API chaqiruv / kanal |
 |---|---|
 | "Tushlik cho'qqisi" tugmasi | `POST /api/demo/scenario {branchId, scenario:"lunch_peak"}` |
-| Tavsiya paydo bo'lishi | `POST /api/recommendations/refresh?branchId=1` (dashboard avtomatik chaqiradi) |
+| Navbat holati yangilanishi | SignalR push: `/hubs/queue` → `queueStateUpdated` (polling yo'q) |
+| Tavsiya paydo bo'lishi | SignalR push: `recommendationCreated` (Gateway hisoblab, jonli push qiladi) |
+| Anomaliya signali | SignalR push: `anomalyDetected` (surge/slow_operator/backlog); boshlang'ich `GET /api/anomalies` |
 | Qabul qilish | `POST /api/recommendations/{id}/respond {status:"accepted"}` |
 | Normal holatga qaytish | `POST /api/demo/scenario {scenario:"normal"}` |
 
