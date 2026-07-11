@@ -67,7 +67,6 @@ def main() -> None:
     axes[0, 0].legend()
 
     weekday_names = ["Du", "Se", "Ch", "Pa", "Ju", "Sh", "Ya"]
-    wk = hourly.groupby(["weekday", "branch_id"])["arrivals"].sum().unstack()
     daily_wk = hourly.groupby([hourly["bucket"].dt.date, "weekday", "branch_id"])["arrivals"] \
         .sum().groupby(["weekday", "branch_id"]).mean().unstack()
     daily_wk.plot(kind="bar", ax=axes[0, 1])

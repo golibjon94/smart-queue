@@ -12,7 +12,7 @@ import numpy as np
 
 from . import db
 from .arrivals import nhpp_arrivals
-from .config import BRANCHES, DAILY_NOISE_SIGMA, SATURDAY_LAST_HOUR, SERVICES
+from .config import BRANCHES, DAILY_NOISE_SIGMA, SERVICES
 from .intensity import business_hours, hourly_lambda
 from .queue_sim import simulate_day
 
